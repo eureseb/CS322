@@ -1,1 +1,7 @@
-/target/
+# target directories
+/**/target/
+target/*
+target/
+#Java class
+.idea
+*.class
