@@ -4,7 +4,7 @@ public class App
 {
     public static void main( String[] args )
     {
-        String sample = "VAR START num1, num2 AS INT" +
+        String program = "VAR START num1, num2 AS INT" +
                         // "START " +
                         "INPUT: num1, num2 " +
                         "WHILE(num1 < num2) " +
@@ -17,7 +17,7 @@ public class App
 
   
         Interpreter interpret = new Interpreter();
-        String string =  interpret.interpret(sample);
+        String string =  interpret.interpret(program);
         System.out.println(string);
     }
 }
