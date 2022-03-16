@@ -44,4 +44,47 @@ class Lexer {
         
         return type;
     }
+
+    Tokens parseSpecial(String token){
+        Tokens type = null;
+        if (token.equals("&")) {
+            type = CONCATENATOR;
+        }else if (token.equals("=")) {
+            type = EQUALS;
+        }else if (token.equals("(")) {
+            type = PAREN_OPEN;
+        }else if (token.equals(")")) {
+            type = PAREN_CLOSE;
+        }else if (token.equals("+")) {
+            type = PLUS;
+        }else if (token.equals("-")) {
+            type = MINUS;
+        }else if (token.equals("*")) {
+            type = MULTIPLY;
+        }else if (token.equals("/")) {
+            type = DIVIDE;
+        }else if (token.equals("%")) {
+            type = MODULO;
+        }else if (token.equals("[")) {
+            type = ESCAPE_OPEN;
+        }else if (token.equals("]")) {
+            type = ESCAPE_CLOSE;
+        }else if (token.equals(">")) {
+            type = GREATER_THAN;
+        }else if (token.equals(">=")) {
+            type = GREATER_OR_EQUAL;
+        }else if (token.equals("<")) {
+            type = LESS_THAN;
+        }else if (token.equals("<=")) {
+            type = LESS_OR_EQUAL;
+        }else if (token.equals("==")) {
+            type = LOGICAL_EQUAL;
+        }else if (token.equals("!=)")) {
+            type = NOT_EQUAL;
+        }else{
+            type = ERROR;
+        }
+        
+        return type;
+    }
 }
