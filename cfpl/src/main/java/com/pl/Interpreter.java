@@ -1,6 +1,6 @@
 package com.pl;
 
-public class Interpreter {
+class Interpreter {
     
     public Interpreter() {
     }
