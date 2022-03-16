@@ -98,4 +98,8 @@ enum Tokens {
     public String getValue() {
         return value;
     }
+
+    static boolean isIdentifier(String token){
+        return token == "IDEN";
+    }
 }

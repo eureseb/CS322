@@ -19,7 +19,7 @@ class Lexer {
         }else if (token.equals("FLOAT")) {
             type = KW_FLOAT;
         }else if (token.equals("BOOL")) {
-            type = KW_BOOL;
+            type = KW_BOOLEAN;
         }else if (token.equals("START")) {
             type = KW_START;
         }else if (token.equals("STOP")) {
@@ -27,21 +27,21 @@ class Lexer {
         }else if (token.equals("OUTPUT")) {
             type = KW_OUTPUT;
         }else if (token.equals("AND")) {
-            type = KW_AND;
+            type = AND;
         }else if (token.equals("OR")) {
-            type = KW_OR;
+            type = OR;
         }else if (token.equals("NOT")) {
-            type = KW_NOT;
+            type = NOT;
         }else if (token.equals("TRUE")) {
-            type = KW_TRUE;
+            type = BOOL_TRUE;
         }else if (token.equals("FALSE")) {
-            type = KW_FALSE;
+            type = BOOL_FALSE;
         }else if (token.equals("START")) {
             type = KW_OUTPUT;
-        }else if (token.isIdentifier()) {
-            type = KW_IDENTIFIER;
+        }else if (isIdentifier(token)) {
+            type = IDENTIFIER;
         }
-
+        
         return type;
     }
 }
