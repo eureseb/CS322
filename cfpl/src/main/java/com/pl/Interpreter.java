@@ -1,6 +1,6 @@
 package com.pl;
 
-public class Interpreter {
+class Interpreter {
     
     public Interpreter() {
     }
@@ -58,7 +58,6 @@ public class Interpreter {
 //             input = 3
 //         else:               # line is a statement
 //             input = 2
-
 //         state = state_table[state][input]
 //         if state == 3:
 //             break

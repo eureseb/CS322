@@ -1,5 +1,7 @@
 package com.pl;
 
+import javax.lang.model.SourceVersion;
+
 public class App 
 {
     public static void main( String[] args )
@@ -14,8 +16,6 @@ public class App
                         "STOP ";// +
                         // "STOP";
 
-
-  
         Interpreter interpret = new Interpreter();
         String string =  interpret.interpret(program);
         System.out.println(string);
