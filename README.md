@@ -1,4 +1,4 @@
-# CS322 CFPL Project
+# CS322 CFPL
 
 | Members |
 |--------- |
