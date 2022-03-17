@@ -2,7 +2,43 @@ package com.pl;
 
 import static com.pl.Tokens.*;
 
+import java.util.regex.Pattern;
+
 class Lexer {
+    
+
+    /*
+    def checktoken(self, token):
+    if re.match(r'\"(.+?)\"', token):
+        type = Tokens.STRING
+    if (re.match(r'((-*)\d+\.\d+)', token)):
+        type = Tokens.FLOAT
+    elif (re.match(r'((-*)\d)', token)):
+        type = Tokens.INT
+    elif (re.match(r'(^[a-zA-Z_$][a-zA-Z_$0-9]*$)', token)):
+        type = self.parseAlpha(token)
+    elif (re.match(r'.', token)):
+        type = self.parseSpecial(token)
+    else:
+        type = Tokens.ERROR
+    return type
+    */
+
+    Tokens checktoken(String token){
+        Tokens type = null;
+
+        //\"(.+?)\"
+        
+        if (isString(token)){
+            type = Tokens.STRING;
+        }
+
+        return type;
+    }
+
+    private boolean isString(String token){
+        return Pattern.matches("(.+?)", token);
+    }
     
     Tokens parseAlpha(String token){
         Tokens type = null;
