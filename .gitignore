@@ -2,6 +2,8 @@
 /**/target/
 target/*
 target/
-#Java class
+# IDE ext
 .idea
+.vscode
+# Java class
 *.class
