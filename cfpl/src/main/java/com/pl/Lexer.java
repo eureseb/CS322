@@ -5,41 +5,44 @@ import static com.pl.Tokens.*;
 import java.util.regex.Pattern;
 
 class Lexer {
-    
+    private static final String[] symbol_list = {",", "+", "*", "/", "==", "(", ")", "=", "<=", ">=", "&"};
+    private int status = 0;
 
-    /*
-    def checktoken(self, token):
-    if re.match(r'\"(.+?)\"', token):
-        type = Tokens.STRING
-    if (re.match(r'((-*)\d+\.\d+)', token)):
-        type = Tokens.FLOAT
-    elif (re.match(r'((-*)\d)', token)):
-        type = Tokens.INT
-    elif (re.match(r'(^[a-zA-Z_$][a-zA-Z_$0-9]*$)', token)):
-        type = self.parseAlpha(token)
-    elif (re.match(r'.', token)):
-        type = self.parseSpecial(token)
-    else:
-        type = Tokens.ERROR
-    return type
-    */
-
-    Tokens checktoken(String token){
+    Tokens checkToken(String token){
         Tokens type = null;
 
-        //\"(.+?)\"
-        
-        if (isString(token)){
+        if (isString(token)) {
             type = Tokens.STRING;
+        }
+
+        if (isFloat(token)) {
+            type = Tokens.FLOAT;
+        }
+
+        else if (isInt(token)) {
+            type = Tokens.INT;
+        }
+        
+        else if (isAlpha(token)) {
+            if (type != null) {
+                if (parseAlpha(token) != null) {   
+                    type = parseAlpha(token);
+                }
+            }
+        }
+
+        else if (isSpecial(token)) {
+            type = parseSpecial(token);
+        }
+        
+        else {
+            type = Tokens.ERROR;
         }
 
         return type;
     }
 
-    private boolean isString(String token){
-        return Pattern.matches("(.+?)", token);
-    }
-    
+
     Tokens parseAlpha(String token){
         Tokens type = null;
         if (token.equals("VAR")) {
@@ -72,8 +75,6 @@ class Lexer {
             type = BOOL_TRUE;
         }else if (token.equals("FALSE")) {
             type = BOOL_FALSE;
-        }else if (token.equals("START")) {
-            type = KW_OUTPUT;
         }else if (isIdentifier(token)) {
             type = IDENTIFIER;
         }
@@ -115,12 +116,42 @@ class Lexer {
             type = LESS_OR_EQUAL;
         }else if (token.equals("==")) {
             type = LOGICAL_EQUAL;
-        }else if (token.equals("!=)")) {
+        }else if (token.equals("!=")) {
             type = NOT_EQUAL;
         }else{
             type = ERROR;
         }
         
         return type;
+    }
+
+    String replaceStatement(String statement){
+        for(int i = 0; i < symbol_list.length; i++){
+            statement = statement.replace(symbol_list[i], ""+symbol_list[i]+"");
+        }
+        return statement.replace("= =", "==");
+    }
+    private boolean isString(String token){
+        return Pattern.matches("(.+?)", token);
+    }
+
+    private boolean isFloat(String token){
+        return Pattern.matches("-?\\d+\\.\\d+", token);
+    }
+
+    private boolean isInt(String token){
+        return Pattern.matches("(-?)\\d+", token);
+    }
+    
+    private boolean isSpecial(String token){
+        return Pattern.matches(".", token);
+    }
+
+    private boolean isAlpha(String token){
+        return Pattern.matches("^[a-zA-Z_$][a-zA-Z_$0-9]*$", token);
+    }
+
+    int getStatus(){
+        return this.status;
     }
 }
