@@ -26,13 +26,15 @@ class Interpreter {
             else input = 2;
 
             state = state_table[state][input];
-            
             System.out.println(state);
+            System.out.println(input);
+            
+            
             if(state == 3){
                 System.out.println(string);
                 break;
             }
         }
-        return state == 2 ? "Code is complete" : "Code has errors";
+        return state == 2 ? "COMPLETE CODE" : "WRONG CODE";
     }
 }

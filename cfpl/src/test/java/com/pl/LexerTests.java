@@ -3,8 +3,12 @@ package com.pl;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static com.pl.Tokens.*;
 
 class LexerTests {
     
@@ -22,6 +26,17 @@ class LexerTests {
         //When
         Tokens actual = lexer.checkToken(token);
         Tokens expected = Tokens.STRING;
+        //Then
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void checkToken_returns_KW_INT_token_when_given_INT(){
+        //Given 
+        String token = "INT";
+        //When
+        Tokens actual = lexer.checkToken(token);
+        Tokens expected = Tokens.KW_INT;
         //Then
         assertEquals(expected, actual);
     }
@@ -88,6 +103,35 @@ class LexerTests {
             () -> assertEquals("string32&(3&*_", lexer.replaceStatement("string32&(3&*_")),
             () -> assertEquals("123#12", lexer.replaceStatement("123#12")),
             () -> assertEquals("1>0", lexer.replaceStatement("1>0"))
+        );
+    }
+
+    @Test
+    void parse_get_correct_tokens_and_strings_from_statement(){
+
+        String statement = "VAR START num2 AS INT";
+
+        ArrayList<Tokens> expectedTokens = new ArrayList<>();
+        expectedTokens.add(KW_VAR);
+        expectedTokens.add(KW_START);
+        expectedTokens.add(STRING);
+        expectedTokens.add(KW_AS);
+        expectedTokens.add(KW_INT);
+
+        ArrayList<String> expectedStrings = new ArrayList<>();
+        expectedStrings.add("VAR");
+        expectedStrings.add("START");
+        expectedStrings.add("num2");
+        expectedStrings.add("AS");
+        expectedStrings.add("INT");
+
+        Pair<ArrayList<Tokens>, ArrayList<String>> actual_tokens_strings =
+                                                lexer.parse(statement);
+                                                
+        assertAll(
+            () -> assertEquals(expectedTokens, actual_tokens_strings.getFirst()),
+            () -> assertEquals(expectedStrings, actual_tokens_strings.getSecond())
+
         );
     }
 }

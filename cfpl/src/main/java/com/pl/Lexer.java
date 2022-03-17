@@ -2,12 +2,44 @@ package com.pl;
 
 import static com.pl.Tokens.*;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 class Lexer {
     private static final String[] symbol_list = {",", "+", "*", "/", "==", "(", ")", "=", "<=", ">=", "&"};
     private int status = 0;
 
+
+     Pair<ArrayList<Tokens>, ArrayList<String>> parse(String stmt){
+        String statement = replaceStatement(stmt);
+        String[] tokens = statement.split(" ");
+        ArrayList<Tokens> tokenList = new ArrayList<Tokens>();
+        ArrayList<String> actualStringList = new ArrayList<String>();
+
+        int ctr = 0;
+        for(String token: tokens){
+            ctr++;
+            Tokens type = null;
+            if (!token.isBlank() ){
+                type = checkToken(token);
+                // System.out.println(token + type);
+            }
+
+            if(type == Tokens.ERROR){
+                tokenList.clear();
+                tokenList.add(Tokens.ERROR);
+                break;
+            }
+            else {
+                tokenList.add(type);
+            }
+            actualStringList.add(token);
+
+        }
+
+        return new Pair<ArrayList<Tokens>, ArrayList<String>>(tokenList, actualStringList);
+    }
+    
     Tokens checkToken(String token){
         Tokens type = null;
 
@@ -154,4 +186,6 @@ class Lexer {
     int getStatus(){
         return this.status;
     }
+
+    
 }
