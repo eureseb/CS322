@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static com.pl.Tokens.*;
+import static com.pl.TokenType.*;
 
 class LexerTests {
     
@@ -24,8 +24,8 @@ class LexerTests {
         //Given 
         String token = "Thisastring";
         //When
-        Tokens actual = lexer.checkToken(token);
-        Tokens expected = Tokens.STRING;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = STRING;
         //Then
         assertEquals(expected, actual);
     }
@@ -35,8 +35,8 @@ class LexerTests {
         //Given 
         String token = "INT";
         //When
-        Tokens actual = lexer.checkToken(token);
-        Tokens expected = Tokens.KW_INT;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = KW_INT;
         //Then
         assertEquals(expected, actual);
     }
@@ -45,8 +45,8 @@ class LexerTests {
         //Given 
         String token = "-3.0";
         //When
-        Tokens actual = lexer.checkToken(token);
-        Tokens expected = Tokens.FLOAT;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = FLOAT;
         //Then
         assertEquals(expected, actual);
     }
@@ -56,8 +56,8 @@ class LexerTests {
         //Given 
         String token = "3";
         //When
-        Tokens actual = lexer.checkToken(token);
-        Tokens expected = Tokens.INT;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = INT;
         //Then
         assertEquals(expected, actual);
     }
@@ -68,8 +68,8 @@ class LexerTests {
         //Given 
         String token = "VAR";
         //When
-        Tokens actual = lexer.checkToken(token);
-        Tokens expected = Tokens.KW_VAR;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = KW_VAR;
         //Then
         assertEquals(expected, actual);
     }
@@ -80,8 +80,8 @@ class LexerTests {
         //Given 
         String token = "var";
         //When
-        Tokens actual = lexer.checkToken(token);
-        Tokens expected = Tokens.STRING;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = STRING;
         //Then
         assertEquals(expected, actual);
     }
@@ -90,8 +90,8 @@ class LexerTests {
             //Given 
             String token = "=";
             //When
-            Tokens actual = lexer.checkToken(token);
-            Tokens expected = Tokens.EQUALS;
+        TokenType actual = lexer.checkToken(token);
+        TokenType expected = EQUALS;
             //Then
             assertEquals(expected, actual);
         }
@@ -111,7 +111,7 @@ class LexerTests {
 
         String statement = "VAR START num2 AS INT";
 
-        ArrayList<Tokens> expectedTokens = new ArrayList<>();
+        ArrayList<TokenType> expectedTokens = new ArrayList<>();
         expectedTokens.add(KW_VAR);
         expectedTokens.add(KW_START);
         expectedTokens.add(STRING);
@@ -125,7 +125,7 @@ class LexerTests {
         expectedStrings.add("AS");
         expectedStrings.add("INT");
 
-        Pair<ArrayList<Tokens>, ArrayList<String>> actual_tokens_strings =
+        Pair<ArrayList<TokenType>, ArrayList<String>> actual_tokens_strings =
                                                 lexer.parse(statement);
                                                 
         assertAll(

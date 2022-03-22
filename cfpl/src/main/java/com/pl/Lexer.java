@@ -1,6 +1,6 @@
 package com.pl;
 
-import static com.pl.Tokens.*;
+import static com.pl.TokenType.*;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -10,24 +10,24 @@ class Lexer {
     private int status = 0;
 
 
-     Pair<ArrayList<Tokens>, ArrayList<String>> parse(String stmt){
+     Pair<ArrayList<TokenType>, ArrayList<String>> parse(String stmt){
         String statement = replaceStatement(stmt);
         String[] tokens = statement.split(" ");
-        ArrayList<Tokens> tokenList = new ArrayList<Tokens>();
+        ArrayList<TokenType> tokenList = new ArrayList<TokenType>();
         ArrayList<String> actualStringList = new ArrayList<String>();
 
         int ctr = 0;
         for(String token: tokens){
             ctr++;
-            Tokens type = null;
+            TokenType type = null;
             if (!token.isBlank() ){
                 type = checkToken(token);
                 // System.out.println(token + type);
             }
 
-            if(type == Tokens.ERROR){
+            if(type == TokenType.ERROR){
                 tokenList.clear();
-                tokenList.add(Tokens.ERROR);
+                tokenList.add(TokenType.ERROR);
                 break;
             }
             else {
@@ -37,22 +37,22 @@ class Lexer {
 
         }
 
-        return new Pair<ArrayList<Tokens>, ArrayList<String>>(tokenList, actualStringList);
+        return new Pair<ArrayList<TokenType>, ArrayList<String>>(tokenList, actualStringList);
     }
-    
-    Tokens checkToken(String token){
-        Tokens type = null;
+
+    TokenType checkToken(String token){
+        TokenType type = null;
 
         if (isString(token)) {
-            type = Tokens.STRING;
+            type = TokenType.STRING;
         }
 
         if (isFloat(token)) {
-            type = Tokens.FLOAT;
+            type = TokenType.FLOAT;
         }
 
         else if (isInt(token)) {
-            type = Tokens.INT;
+            type = TokenType.INT;
         }
         
         else if (isAlpha(token)) {
@@ -68,15 +68,15 @@ class Lexer {
         }
         
         else {
-            type = Tokens.ERROR;
+            type = TokenType.ERROR;
         }
 
         return type;
     }
 
 
-    Tokens parseAlpha(String token){
-        Tokens type = null;
+    TokenType parseAlpha(String token){
+        TokenType type = null;
         if (token.equals("VAR")) {
             type = KW_VAR;
         }else if (token.equals("OUTPUT")) {
@@ -114,8 +114,8 @@ class Lexer {
         return type;
     }
 
-    Tokens parseSpecial(String token){
-        Tokens type = null;
+    TokenType parseSpecial(String token){
+        TokenType type = null;
         if (token.equals("&")) {
             type = CONCATENATOR;
         }else if (token.equals("=")) {

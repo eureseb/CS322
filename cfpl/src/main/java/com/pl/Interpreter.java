@@ -31,10 +31,13 @@ class Interpreter {
             
             
             if(state == 3){
-                System.out.println(string);
                 break;
             }
         }
+        if(state==2){
+            System.out.println("COMPLETE CODE");
+        }
+        else System.out.println("WRONG CODE");
         return state == 2 ? "COMPLETE CODE" : "WRONG CODE";
     }
 }

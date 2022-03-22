@@ -1,10 +1,10 @@
 package com.pl;
 
-enum Tokens {
+enum TokenType {
     // Keywords
-    KW_START("KW_START"), 
-    KW_STOP("KW_STOP"), 
-    KW_VAR("KW_VAR"), 
+    KW_START("KW_START"),
+    KW_STOP("KW_STOP"),
+    KW_VAR("KW_VAR"),
     KW_AS("KW_AS"),
     KW_INT("KW_INTEGER"),
     KW_FLOAT("KW_FLOATING"),
@@ -55,6 +55,9 @@ enum Tokens {
     AND("AND"),
     OR("OR"),
     NOT("NOT"),
+    IF("IF"),
+    ELSE("ELSE"),
+    WHILE("WHILE"),
     GREATER_THAN("GRE"),
     GREATER_OR_EQUAL("GOE"),
     LESS_THAN("LES"),
@@ -75,15 +78,16 @@ enum Tokens {
     ERROR("ERR"),
 
     //Statement Type
-
     ST_DECLARATION("DECLARATION"),
     ST_ASSIGNMENT("ASSIGNMENT"),
     ST_OUTPUT("OUTPUT"),
-    ST_INPUT("INPUT");
-    
+    ST_INPUT("INPUT"),
+
+    //End of file
+    EOF("FILE_END");
     private final String value;
 
-    Tokens(String value){
+    TokenType(String value){
         this.value = value;
     }
 

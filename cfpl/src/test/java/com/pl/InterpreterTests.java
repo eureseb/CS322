@@ -25,13 +25,36 @@ class InterpreterTests {
 
     @Test
     void interpret_code_is_complete_start_stop(){
-        String program = "START\n" +
+            String program = "START\n" +
                         "STOP ";
         Interpreter interpret = new Interpreter();
         String actual =  interpret.interpret(program);
         String expected = "COMPLETE CODE";
         assertEquals(expected, actual);   
     }
+
+    @Test
+    void interpret_var_while_start_stop_produces_error(){
+        String program = "VAR WHILE AS INT\n" +
+                         "START\n" +
+                         "STOP ";
+        Interpreter interpret = new Interpreter();
+        String actual =  interpret.interpret(program);
+        String expected = "WRONG CODE";
+        assertEquals(expected, actual);   
+    }
+
+    @Test
+    void interpret_var_float_start_stop_produces_error(){
+        String program = "VAR FLOAT AS INT\n" +
+                         "START\n" +
+                         "STOP ";
+        Interpreter interpret = new Interpreter();
+        String actual =  interpret.interpret(program);
+        String expected = "WRONG CODE";
+        assertEquals(expected, actual);   
+    }
+
     @Test
     void interpret_error_when_wrong_syntax_check(){
         String program = "START\n" +
@@ -54,4 +77,16 @@ class InterpreterTests {
         String expected = "WRONG CODE";
         assertEquals(expected, actual);   
     }
+
+    // @Test
+    // void interpret_all_test_case_pass(){
+    //     assertAll(
+    //         () -> assertEquals(expected,  interpret.interpret("STOP")),
+    //         () -> assertEquals(expected,  interpret.interpret("START")),
+    //         () -> assertEquals(expected,  interpret.interpret("START STOP")),
+    //         () -> assertEquals(expected,  interpret.interpret("START\nSTOP"))
+            
+            
+    //     );
+    // }
 }
