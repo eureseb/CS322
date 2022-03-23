@@ -23,7 +23,7 @@ public class Parser {
         advance();
     }
 
-    public Token advance(){
+    private Token advance(){
         this.ctr += 1;
         if(ctr < tokens.size()){
             this.currToken = this.tokens.get(ctr);
@@ -33,13 +33,13 @@ public class Parser {
         return null;
     }
 
-    public Node parse(){
+    Node parse(){
         //Node ast = expression();
         Node ast = program();
         return ast;
     }
 
-    public Node factor(){                             //for constants
+    Node factor(){                             //for constants
         temp = currToken;
         Node nodeExpr;
         if(currToken.isPlusOrMinus()){            //for UNARY
@@ -63,7 +63,7 @@ public class Parser {
         return null;
     }
 
-    public Node term(){
+    Node term(){
 
         Node left = this.factor(), right;
         Token operator;
@@ -77,7 +77,7 @@ public class Parser {
         return left;
     }
 
-    public Node expression(){
+    Node expression(){
         Node left = this.term(), right;
         Token operator;
 
@@ -90,7 +90,7 @@ public class Parser {
         return left;
     }
 
-    public Statement statement(){
+    Statement declareStmt(){
         Token temp = currToken, operator;
         Node nodeExpr;
 
@@ -148,14 +148,14 @@ public class Parser {
     }
 
 
-    public Statement statements(){
-        Statement stmtHead = statement();
+    Statement declareMultStmts(){
+        Statement stmtHead = declareStmt();
         Statement curr = stmtHead;
 
         advance();
 
         while(!(currToken.isEofOrStop())){
-            curr.setNext(statement());
+            curr.setNext(declareStmt());
             curr = curr.getNext();
             if(!currToken.getType().equals(KW_STOP)){
                 advance();
@@ -164,23 +164,13 @@ public class Parser {
         return stmtHead;
     }
 
-
-    //This is only for single var per statement
-    private boolean isValidVarDeclaration(){
-        boolean firstIsVar = currToken.getType().equals(KW_VAR);
-        boolean secondIsIden = tokens.get(this.ctr+1).getType().equals(IDENTIFIER);
-        boolean thirdIsAS = tokens.get(this.ctr+2).getType().equals(KW_AS);
-        return firstIsVar && secondIsIden && thirdIsAS;
-    }
-    public VariableDeclarationNode declareVar(){
+    VariableDeclarationNode declareVar(){
         Object var, datatype;
         Token identifier;
 
         if(isValidVarDeclaration()){
             var = currToken;
-            //prev: identifier = tokens.get(this.ctr+1);
             identifier = advance();
-            //prev:as = tokens.get(this.ctr+2);
             advance();
 
             TokenType currentDataType = advance().getType();
@@ -202,7 +192,7 @@ public class Parser {
     }
 
 
-    public Node declareMultipleVars(){
+    Node declareMultVars(){
 
         VariableDeclarationNode head = declareVar();
         VariableDeclarationNode curr= head;
@@ -220,13 +210,13 @@ public class Parser {
     }
 
 
-    public ProgramNode program() {
+    ProgramNode program() {
         Node head_var = null;
         Object start = null, stop = null;
         Node head_statement = null;
 
         if(currToken.getType().equals(KW_VAR)){ // Checking if start of program has var declaration
-            head_var = declareMultipleVars();
+            head_var = declareMultVars();
         }
 
         if(currToken.getType().equals(KW_START)){ //Continue with START keyword
@@ -235,7 +225,7 @@ public class Parser {
              advance();
              //add error handling here that does not allow anything after start
             if(!currToken.getType().equals(KW_STOP) || !currToken.getType().equals(EOF)){
-                head_statement = statements();
+                head_statement = declareMultStmts();
             }
 
             if(currToken.getType().equals(KW_STOP)){
@@ -255,6 +245,13 @@ public class Parser {
              hadError=true;
          }
          return new ProgramNode(head_var, start, head_statement, stop);
+    }
+
+    private boolean isValidVarDeclaration(){
+        boolean firstIsVar = currToken.getType().equals(KW_VAR);
+        boolean secondIsIden = tokens.get(this.ctr+1).getType().equals(IDENTIFIER);
+        boolean thirdIsAS = tokens.get(this.ctr+2).getType().equals(KW_AS);
+        return firstIsVar && secondIsIden && thirdIsAS;
     }
 
 }

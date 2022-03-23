@@ -78,7 +78,7 @@ public class Interpreter {
             visit(ndR.getNext());
         }
     }
-    
+
     public void visitUnaryNode(UnaryNode unaryNode){
         UnaryNode ndR = unaryNode;
         visit(ndR.getNum());
@@ -102,23 +102,5 @@ public class Interpreter {
         StringNode ndR = strNode;
         output = strNode.getString().getLexeme();
         System.out.println(output);
-    }
-
-
-
-
-    public class Number{
-        public Double value;
-
-        /*Number(Object value){
-            this.value;
-        }
-
-        public Object add(Object node){
-            if(node instanceof Integer || node instanceof Double){
-                value
-            }
-        }*/
-
     }
 }
