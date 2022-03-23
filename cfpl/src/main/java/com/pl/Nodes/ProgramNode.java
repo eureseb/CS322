@@ -6,6 +6,7 @@ public class ProgramNode extends Node {
     private Node varDeclarations;
     private Node stmtDeclaration;
 
+    public ProgramNode() {};
     public ProgramNode(Node vardecl, Object start, Node statements, Object stop) {
         this.varDeclarations = vardecl;
         this.start = start;

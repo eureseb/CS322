@@ -8,11 +8,12 @@ import com.pl.Statements.OutputStatement;
 public class Interpreter {
     String output;
 
-
+    public Interpreter(){}
     public void visit(Node node){
-        System.out.println(node.getClass().toString());
+        
         if(node == null){
-            System.out.println("oops null");
+            System.out.println("Error cannot parse Null Node");
+            return;
         }
         else if(node.getClass().toString().equals("class com.pl.Nodes.ProgramNode")){
             visitProgramNode((ProgramNode)node);
@@ -41,6 +42,7 @@ public class Interpreter {
         else{
             illegalVisit(node);
         }
+        System.out.println(node.getClass().toString());
     }
 
     public void illegalVisit(Node node){

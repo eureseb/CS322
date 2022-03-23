@@ -24,3 +24,21 @@
 | declareVar()       | for declaring variables. Accepted syntax: "\[KW_VAR\] \[IDENTIFIER\] \[KW_AS\] \[{DataType}\]"                            |
 | declareMultVars()  | calls declareVar() when KW_VAR is present                                                                                 |
 | program()          | generates an AST from the tokenList. returns ProgramNode aka AST head                                                     |
+
+| Lexer                     | Use |
+| ------------------------- | --- |
+| scanTokens()              |     |
+| scanToken()               |     |
+| integerOrFloat()          |     |
+| bool()                    |     |
+| isAlphaNumeric()          |     |
+| identifier()              |     |
+| addToken()                |     |
+| match()                   |     |
+| character()               |     |
+| peek()                    |     |
+| peekNext()                |     |
+| error()                   |     |
+| nextCharacterFromSource() |     |
+| getCurrentCharacter()     |     |
+| isAtEnd()                 |     |

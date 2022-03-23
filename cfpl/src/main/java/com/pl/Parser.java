@@ -22,7 +22,7 @@ public class Parser {
         ctr = -1;
         advance();
     }
-
+   
     private Token advance(){
         this.ctr += 1;
         if(ctr < tokens.size()){
@@ -35,7 +35,7 @@ public class Parser {
 
     Node parse(){
         //Node ast = expression();
-        Node ast = program();
+        ProgramNode ast = program();
         return ast;
     }
 
@@ -196,15 +196,14 @@ public class Parser {
 
         VariableDeclarationNode head = declareVar();
         VariableDeclarationNode curr= head;
-
-        advance();      // /n
-        advance();      // next VAR
-
+        // assuming currently \n;
+        advance();      
+        // assuming currently VAR or START;
         while (currToken.getType().equals(KW_VAR)){
             curr.setNext(declareVar());
             curr = curr.getNext();
             advance();
-            advance();
+            
         }
         return head;
     }
@@ -214,17 +213,14 @@ public class Parser {
         Node head_var = null;
         Object start = null, stop = null;
         Node head_statement = null;
-
         if(currToken.getType().equals(KW_VAR)){ // Checking if start of program has var declaration
             head_var = declareMultVars();
         }
-
         if(currToken.getType().equals(KW_START)){ //Continue with START keyword
-             start = currToken;
-             advance();
-             advance();
+             start = currToken; // KW_START
+             advance(); // currTokenType = STOP
              //add error handling here that does not allow anything after start
-            if(!currToken.getType().equals(KW_STOP) || !currToken.getType().equals(EOF)){
+            if(!(currToken.isEofOrStop())){
                 head_statement = declareMultStmts();
             }
 
@@ -244,7 +240,9 @@ public class Parser {
             }
              hadError=true;
          }
-         return new ProgramNode(head_var, start, head_statement, stop);
+         ProgramNode progNode = new ProgramNode(head_var, start, head_statement, stop);
+         ProgramNode pNode = new ProgramNode(head_var, start, head_statement, stop);
+         return pNode;
     }
 
     private boolean isValidVarDeclaration(){
@@ -252,6 +250,9 @@ public class Parser {
         boolean secondIsIden = tokens.get(this.ctr+1).getType().equals(IDENTIFIER);
         boolean thirdIsAS = tokens.get(this.ctr+2).getType().equals(KW_AS);
         return firstIsVar && secondIsIden && thirdIsAS;
+    }
+    public List<Token> getTokens(){
+        return this.tokens;
     }
 
 }

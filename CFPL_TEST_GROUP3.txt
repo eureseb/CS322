@@ -1,0 +1,4 @@
+VAR eurese AS INT
+VAR antony AS INT
+START
+STOP

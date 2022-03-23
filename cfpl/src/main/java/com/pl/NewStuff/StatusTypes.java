@@ -1,4 +1,4 @@
-package com.pl;
+package com.pl.NewStuff;
 
 public enum StatusTypes {
 
