@@ -78,6 +78,25 @@ class InterpreterTests {
         assertEquals(expected, actual);   
     }
 
+    @Test
+    void interpret_when_there_is_comment(){
+        String program = "VAR\n"+
+                "START\n" +
+                "*xyz should have the value -60\n"+
+                "*STOP\n"+
+                "STOP";
+        Interpreter interpret = new Interpreter();
+        Comment comment = new Comment();
+
+        String actual =  interpret.interpret(program);
+        String output =  comment.Comment(program);
+
+        String expected = "COMPLETE CODE";
+        System.out.println(output);
+
+        assertEquals(expected, actual);
+    }
+
     // @Test
     // void interpret_all_test_case_pass(){
     //     assertAll(
