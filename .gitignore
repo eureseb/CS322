@@ -4,6 +4,7 @@ target/*
 target/
 # IDE ext
 *.iml
+*.xml
 .idea
 .vscode
 # Java class
