@@ -126,7 +126,7 @@ class LexerTests {
         expectedStrings.add("INT");
 
         Pair<ArrayList<TokenType>, ArrayList<String>> actual_tokens_strings =
-                                                lexer.parse(statement);
+                                                lexer.getTokens(statement);
                                                 
         assertAll(
             () -> assertEquals(expectedTokens, actual_tokens_strings.getFirst()),

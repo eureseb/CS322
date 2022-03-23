@@ -8,12 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Scanner {
+class Scanner {
     private final String source;
+    private int sourceLen;
     private final List<Token> tokens = new ArrayList<Token>();
-    private int start = 0;
-    private int current = 0;
-    public static int line = 1;
+    private Position position;
 
     private static final Map<String, TokenType> reserved;
 
@@ -37,29 +36,35 @@ public class Scanner {
 
     public Scanner(String source) {
         this.source = source;
+        this.sourceLen = source.length();
+        this.position = new Position(0, 1, 0, source.length());
     }
 
     public List<Token> scanTokens() {
+
         while (!isAtEnd()) {
-            start = current;
             scanToken();
         }
-        tokens.add(new Token(EOF, "", null, line));
+        tokens.add(new Token(EOF, "", null, position.getLine()));
+
         return tokens;
     }
 
     private boolean isAtEnd() {
-        return current >= source.length();
+        return position.getIndex() >= sourceLen;
     }
 
-    private char advance() {
-        current++;
-        return source.charAt(current - 1);
+
+    private char nextCharacterFromSource() {
+        char currentCharacter = getCurrentCharacter();
+        position.advancePosition(currentCharacter);
+        return currentCharacter;
     }
 
     private void scanToken() {
-        char c = advance();
+        char c = nextCharacterFromSource();
         switch (c) {
+
             case '(':
                 addToken(PAREN_OPEN);
                 break;
@@ -105,10 +110,8 @@ public class Scanner {
             case '=':
                 addToken(match('=') ? LOGICAL_EQUAL : EQUALS);
                 break;
-            case '\n':
-                line++;
-                break;
             case '\r':
+            case '\n':
             case '\t':
             case ' ':
                 break;
@@ -126,7 +129,7 @@ public class Scanner {
                     identifier();
                     break;
                 }
-                error(line, "Syntax error due to " + c);
+                error(position.getLine(), "Syntax error due to " + c);
                 break;
         }
 
@@ -134,26 +137,26 @@ public class Scanner {
 
     private void integerOrFloat() {
         TokenType t = INT;
+        int start = position.getIndex();
         while (isDigit(peek())) {
-            advance();
+            nextCharacterFromSource();
         }
         if (peek() == '.' && isDigit(peekNext())) {
             t = FLOAT;
-            advance();
+            nextCharacterFromSource();
         }
         while (isDigit(peek()))
-            advance();
+            nextCharacterFromSource();
+        int end = position.getIndex();
         if (t == INT)
-            addToken(INT, Integer.parseInt(source.substring(start, current)));
+            addToken(INT, Integer.parseInt(source.substring(start, end)), start, end);
         else if (t == FLOAT)
-            addToken(FLOAT, Float.parseFloat(source.substring(start, current)));
+            addToken(FLOAT, Float.parseFloat(source.substring(start, end)), start, end);
     }
 
     private void bool() {
         while (peek() != '\"' && !isAtEnd()) {
-            if (peek() == '\n')
-                line++;
-            advance();
+            nextCharacterFromSource();
         }
     }
 
@@ -162,70 +165,75 @@ public class Scanner {
     }
 
     private void identifier() {
+        int start = position.getIndex();
         while (isAlphaNumeric(peek())) {
-            advance();
+            nextCharacterFromSource();
         }
-        String s = source.substring(start, current);
+        int end = position.getIndex();
+
+        String s = source.substring(start-1, end);
         TokenType t = reserved.get(s);
-        if (t == null)
+        if (t == null){
             t = IDENTIFIER;
-        addToken(t);
+        }
+        addToken(t, null, start-1, end);
     }
 
     private void addToken(TokenType type) {
-        addToken(type, null);
+        addToken(type, null, position.getIndex()-1, position.getIndex());
     }
 
-    private void addToken(TokenType type, Object literal) {
-        String text = source.substring(start, current);
-        tokens.add(new Token(type, text, literal, line));
+    private void addToken(TokenType type, Object literal,int startPos,int endPos) {
+        String text = source.substring(startPos, endPos);
+        tokens.add(new Token(type, text, literal, position.getLine()));
     }
 
     private boolean match(char expected) {
         if (isAtEnd())
             return false;
-        if (source.charAt(current) != expected)
+        if (source.charAt( position.getIndex() ) != expected)
             return false;
 
-        current++;
+        position.advancePosition(getCurrentCharacter());
         return true;
     }
 
     private void character() {
+        int start = position.getIndex();
         while (peek() != '\'' && !isAtEnd()) {
-            if (peek() == '\n')
-                line++;
-            advance();
+            nextCharacterFromSource();
         }
 
         // Unterminated string.
-        if (isAtEnd()) {
-            error(line, "Unterminated character.");
+        if (isAtEnd() || getCurrentCharacter() != '\'') {
+            error(position.getLine(), "Unterminated character.");
             return;
         }
 
-        // The closing '.''
-        advance();
-
+        // The closing '\''
+        nextCharacterFromSource();
+        int end = position.getIndex();
         // Trim the surrounding quotes.
-        String value = source.substring(start + 1, current - 1);
-        addToken(KW_CHAR, value);
+        String value = source.substring(start + 1, end);
+        addToken(KW_CHAR, value, start+1, end);
     }
 
+    private char getCurrentCharacter(){
+        return source.charAt(position.getIndex());
+    }
     private char peek() {
         if (isAtEnd())
             return '\0';
-        return source.charAt(current);
+        return getCurrentCharacter();
     }
-
     private char peekNext() {
-        if (current + 1 >= source.length())
+        if (position.getIndex() + 1 >= source.length())
             return '\0';
-        return source.charAt(current + 1);
+        return source.charAt(position.getIndex() + 1);
     }
 
     private void error(int line, String message) {
-        System.out.println("[line " + line + "] Error" + "" + ": " + message);
+        System.out.println("[line: " + position.getLine() + "," + "col: "+ position.getCol() + "] Error" + getCurrentCharacter() + ": " + message);
     }
 
 }

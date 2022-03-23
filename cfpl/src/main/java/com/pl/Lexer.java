@@ -10,7 +10,7 @@ class Lexer {
     private int status = 0;
 
 
-     Pair<ArrayList<TokenType>, ArrayList<String>> parse(String stmt){
+     Pair<ArrayList<TokenType>, ArrayList<String>> getTokens(String stmt){
         String statement = replaceStatement(stmt);
         String[] tokens = statement.split(" ");
         ArrayList<TokenType> tokenList = new ArrayList<TokenType>();
@@ -22,7 +22,6 @@ class Lexer {
             TokenType type = null;
             if (!token.isBlank() ){
                 type = checkToken(token);
-                // System.out.println(token + type);
             }
 
             if(type == TokenType.ERROR){
