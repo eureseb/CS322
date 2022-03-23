@@ -1,68 +1,260 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package com.pl;
 
-import java.util.ArrayList;
-
+import com.pl.Nodes.*;
+import com.pl.Statements.*;
 import static com.pl.TokenType.*;
-class Parser {
+import java.util.List;
 
 
-    TokenType assignment(ArrayList<TokenType> tokenList){
-        final int state_table[][] = { {1,4,4,4}, 
-                                      {4,2,4,4},
-                                      {3,4,3,4},
-                                      {4,4,4,2},
-                                      {4,4,4,4}};
-        int state = 0;
-        int input = 0;
+public class Parser {
+    List<Token> tokens;
+    int ctr;
+    Token currToken, temp;
+    public boolean hadError = false;
 
-        for(TokenType token: tokenList){
-            if(token == IDENTIFIER){
-                input = 0;
-            }
-            else if (token == EQUALS) {
-                input = 1;
-            }
-            else if (token == STRING) {
-                input = 2;
-            }
-            else if (token == CHAR) {
-                input = 2;
-            }
-            else if (token == INT) {
-                input = 2;
-            }
-            else if (token == FLOAT) {
-                input = 2;
-            }
-            else if (token == BOOL_FALSE) {
-                input = 2;
-            }
-            else if (token == BOOL_TRUE) {
-                input = 2;
-            }
-            else if (token == MULTIPLY) {
-                input = 3;                
-            }
-            else if (token == DIVIDE) {
-                input = 3;
-            }
-            else if (token == PLUS) {
-                input = 3;
-            }
-            else if (token == MINUS) {
-                input = 3;
-            }
-            else if (token == MODULO) {
-                input = 3;
-            }
+    public Parser(List<Token> tokens){
+        this.tokens = tokens;
+        ctr = -1;
+        advance();
+    }
 
-            state = state_table[state][input];
-            if(state == 4){
-                break;
-            }
+    public Token advance(){
+        this.ctr += 1;
+        if(ctr < tokens.size()){
+            this.currToken = this.tokens.get(ctr);
+            return this.currToken;
+        }else System.out.println("Can't advance further");
+        
+        return null;
+    }
 
+    public Node parse(){
+        //Node ast = expression();
+        Node ast = program();
+        return ast;
+    }
+
+    public Node factor(){                             //for constants
+        temp = currToken;
+        Node nodeExpr;
+        if(currToken.isPlusOrMinus()){            //for UNARY
+            advance();
+            if(currToken.isIntOrFloat()){
+                return new UnaryNode(temp, factor());
+            }
         }
-        return state == 3 ? ST_ASSIGNMENT : ERROR;
+        else if(currToken.isIntOrFloat()){
+            advance();
+            return new NumberNode(temp);
+        }
+        else if(currToken.getType().equals(PAREN_OPEN)){
+            advance();
+            nodeExpr = expression();
+            if(currToken.getType().equals(PAREN_CLOSE)){
+                advance();
+                return nodeExpr;
+            }
+        }
+        return null;
+    }
+
+    public Node term(){
+
+        Node left = this.factor(), right;
+        Token operator;
+
+        while(currToken.isMulOrDiv()){
+            operator = currToken;
+            advance();
+            right = factor();
+            left = new BinaryNode(left, operator,right);
+        }
+        return left;
+    }
+
+    public Node expression(){
+        Node left = this.term(), right;
+        Token operator;
+
+        while(currToken.isPlusOrMinus()){
+            operator = currToken;
+            advance();
+            right = term();
+            left = new BinaryNode(left, operator, right);
+        }
+        return left;
+    }
+
+    public Statement statement(){
+        Token temp = currToken, operator;
+        Node nodeExpr;
+
+        if(currToken.getType().equals(IDENTIFIER)){
+
+            advance();
+            if(currToken.getType().equals(EQUALS)){
+                operator = currToken;
+                advance();
+                nodeExpr = expression();
+                //return new Node.AssignNode(temp, operator, nodeExpr);
+                return new AssignStatement(temp, operator, nodeExpr);
+            }
+            else{
+                System.out.println("Expected '=' after identifier");
+                hadError = true;
+            }
+        }
+        else if(currToken.getType().equals(KW_OUTPUT)){
+            advance();
+            if(currToken.getType().equals(COLON)){
+                //operator = currToken;                 //COLON symbol would not be included in the AST
+                advance();
+                //should allow: expressions (literal, unary, binary) , string, concatenated string
+
+                //TO DO!!!!! allow printing of values of an identifier
+
+                if(currToken.getType().equals(STRING) ){
+                    return new OutputStatement(temp, new StringNode(currToken));
+                }
+                else{                                                       //if not string, call expression to check and leave there to error
+                    nodeExpr = expression();
+                    return new OutputStatement(temp, nodeExpr);
+                }
+            }
+            else{
+                System.out.println("Missing ':' after OUTPUT keyword");
+                hadError = true;
+            }
+        }/*
+        else if(currToken.type.equals(Token.TokenType.INPUT)){             //for input
+
+        }*/
+        else{
+            //BRUTE FORCE !!!!
+            if(currToken.getType().equals(NEWLINE)){
+                advance();
+            }
+            else{
+                System.out.println(currToken+" "+currToken.getLine());
+                hadError = true;
+            }
+        }
+        return null;
+    }
+
+
+    public Statement statements(){
+        Statement stmtHead = statement();
+        Statement curr = stmtHead;
+
+        advance();
+
+        while(!(currToken.isEofOrStop())){
+            curr.setNext(statement());
+            curr = curr.getNext();
+            if(!currToken.getType().equals(KW_STOP)){
+                advance();
+            }
+        }
+        return stmtHead;
+    }
+
+
+    //This is only for single var per statement
+    private boolean isValidVarDeclaration(){
+        boolean firstIsVar = currToken.getType().equals(KW_VAR);
+        boolean secondIsIden = tokens.get(this.ctr+1).getType().equals(IDENTIFIER);
+        boolean thirdIsAS = tokens.get(this.ctr+2).getType().equals(KW_AS);
+        return firstIsVar && secondIsIden && thirdIsAS;
+    }
+    public VariableDeclarationNode declareVar(){
+        Object var, datatype;
+        Token identifier;
+
+        if(isValidVarDeclaration()){
+            var = currToken;
+            //prev: identifier = tokens.get(this.ctr+1);
+            identifier = advance();
+            //prev:as = tokens.get(this.ctr+2);
+            advance();
+
+            TokenType currentDataType = advance().getType();
+
+            if(isDataType(currentDataType)){
+                datatype = currToken;
+                return new VariableDeclarationNode(var, identifier, datatype);
+            }
+            else{
+                System.out.println("Invalid data type.");
+                hadError = true;
+            }
+        }
+        else{
+            System.out.println("Invalid syntax");
+            hadError = true;
+        }
+        return null;
+    }
+
+
+    public Node declareMultipleVars(){
+
+        VariableDeclarationNode head = declareVar();
+        VariableDeclarationNode curr= head;
+
+        advance();      // /n
+        advance();      // next VAR
+
+        while (currToken.getType().equals(KW_VAR)){
+            curr.setNext(declareVar());
+            curr = curr.getNext();
+            advance();
+            advance();
+        }
+        return head;
+    }
+
+
+    public ProgramNode program() {
+        Node head_var = null;
+        Object start = null, stop = null;
+        Node head_statement = null;
+
+        if(currToken.getType().equals(KW_VAR)){ // Checking if start of program has var declaration
+            head_var = declareMultipleVars();
+        }
+
+        if(currToken.getType().equals(KW_START)){ //Continue with START keyword
+             start = currToken;
+             advance();
+             advance();
+             //add error handling here that does not allow anything after start
+            if(!currToken.getType().equals(KW_STOP) || !currToken.getType().equals(EOF)){
+                head_statement = statements();
+            }
+
+            if(currToken.getType().equals(KW_STOP)){
+                stop = currToken;
+            }
+            else{
+                if(hadError != true){
+                    System.out.println("Missing 'STOP' statement.");
+                }
+                hadError = true;
+            }
+         }
+         else{
+            if(hadError != true){
+                System.out.println("Missing 'START' statement.");
+            }
+             hadError=true;
+         }
+         return new ProgramNode(head_var, start, head_statement, stop);
     }
 
 }

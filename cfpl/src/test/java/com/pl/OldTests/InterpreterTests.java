@@ -32,6 +32,15 @@ class InterpreterTests {
         String expected = "COMPLETE CODE";
         assertEquals(expected, actual);   
     }
+    @Test
+    void interpret_code_is_not_complete_start_no_new_line_stop(){
+            String program = "START " +
+                        "STOP ";
+        Interpreter interpret = new Interpreter();
+        String actual =  interpret.interpret(program);
+        String expected = "COMPLETE CODE";
+        assertEquals(expected, actual);   
+    }
 
     @Test
     void interpret_var_while_start_stop_produces_error(){

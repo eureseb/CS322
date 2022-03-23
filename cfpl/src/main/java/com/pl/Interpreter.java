@@ -1,43 +1,124 @@
 package com.pl;
 
-class Interpreter {
-    
-    public Interpreter() {
+
+import com.pl.Nodes.*;
+import com.pl.Statements.*;
+import com.pl.Statements.OutputStatement;
+
+public class Interpreter {
+    String output;
+
+
+    public void visit(Node node){
+        System.out.println(node.getClass().toString());
+        if(node == null){
+            System.out.println("oops null");
+        }
+        else if(node.getClass().toString().equals("class com.pl.Nodes.ProgramNode")){
+            visitProgramNode((ProgramNode)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Nodes.VariableDeclarationNode")){
+            visitVarDeclareNode((VariableDeclarationNode)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Statements.AssignStatement")){
+            visitAssignStmt((AssignStatement)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Statements.OutputStatement")){
+            visitOutputStmt((OutputStatement)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Nodes.StringNode")){
+            visitStringNode((StringNode)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Nodes.BinaryNode")){
+            visitBinaryNode((BinaryNode)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Nodes.UnaryNode")){
+            visitUnaryNode((UnaryNode)node);
+        }
+        else if(node.getClass().toString().equals("class com.pl.Nodes.NumberNode")){
+            visitNumberNode((NumberNode)node);
+        }
+        else{
+            illegalVisit(node);
+        }
     }
 
-    String interpret(String lines){
-        int state = 0;
-        String line[] = lines.split("\\s+");
+    public void illegalVisit(Node node){
+        System.out.println("You have something that I can't interpret: " + node);
+    }
 
-        final int state_table[][] = { {0,1,3,3}, 
-                                      {3,3,1,2},
-                                      {3,3,3,3}};
-        for (String string : line) {
-            int input = 0;
-            if(string.equals("VAR")){
-                input = 0;
-            }
-            else if(string.equals("START")){
-                input = 1;
-            }
-            else if(string.equals("STOP")){
-                input = 3;
-            }
-            else input = 2;
+    public void visitProgramNode(ProgramNode progNode){
+        ProgramNode ndR = progNode;
+        visit(ndR.getVarDeclarations());
+        visit(ndR.getStmtDeclaration());
+    }
 
-            state = state_table[state][input];
-            System.out.println(state);
-            System.out.println(input);
-            
-            
-            if(state == 3){
-                break;
+    public void visitVarDeclareNode(VariableDeclarationNode varDecNode){
+        VariableDeclarationNode ndR = varDecNode;
+        // TODO!!!!! initialize variable
+        if(ndR.getNext() != null){
+            visit(ndR.getNext());
+        }
+    }
+
+    public void visitAssignStmt(AssignStatement assignStmt){
+        AssignStatement ndR = assignStmt;
+
+        visit(ndR.getRight());
+        if(ndR.getNext() != null){
+            visit(ndR.getNext());
+        }
+    }
+
+    public void visitOutputStmt(OutputStatement outNode){
+        OutputStatement ndR = outNode;
+
+        visit(ndR.getRight());
+        if(ndR.getNext() != null){
+            visit(ndR.getNext());
+        }
+    }
+    
+    public void visitUnaryNode(UnaryNode unaryNode){
+        UnaryNode ndR = unaryNode;
+        visit(ndR.getNum());
+    }
+
+    public void visitBinaryNode(BinaryNode binNode){
+        BinaryNode ndR = binNode;
+        visit(ndR.getLeft());
+        visit(ndR.getRight());
+    }
+
+    
+
+    public void visitNumberNode(NumberNode numNode){
+        //System.out.println("Found string node");
+        NumberNode ndR = ((NumberNode) numNode);
+        Object obj = numNode.getNum().getLiteral();
+        System.out.println(obj);
+    }
+    public void visitStringNode(StringNode strNode){
+        StringNode ndR = strNode;
+        output = strNode.getString().getLexeme();
+        System.out.println(output);
+    }
+
+
+
+
+    public class Number{
+        public Double value;
+
+        /*Number(Object value){
+            this.value;
+        }
+
+        public Object add(Object node){
+            if(node instanceof Integer || node instanceof Double){
+                value
             }
-        }
-        if(state==2){
-            System.out.println("COMPLETE CODE");
-        }
-        else System.out.println("WRONG CODE");
-        return state == 2 ? "COMPLETE CODE" : "WRONG CODE";
+        }*/
+
     }
 }
