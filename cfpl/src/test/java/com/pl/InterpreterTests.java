@@ -78,6 +78,7 @@ class InterpreterTests {
         assertEquals(expected, actual);   
     }
 
+
     @Test
     void interpret_when_there_is_comment(){
         String program = "VAR\n"+
