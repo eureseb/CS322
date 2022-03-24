@@ -22,22 +22,22 @@ public class App
             }
         }
         
-        System.out.println("\n===== Lexing =====\n");
+        //System.out.println("\n===== Lexing =====\n");
         Lexer lexer = new Lexer(source);
         List<Token> tokens = lexer.scanTokens();
-        System.out.println(tokens);
+        //System.out.println(tokens);
         if(lexer.hadError == true){
             System.exit(500);
         }
 
-        System.out.println("\n===== Parsing =====\n");
+       // System.out.println("\n===== Parsing =====\n");
         Parser parser = new Parser(tokens);
-        System.out.println(parser.getTokens());
+       // System.out.println(parser.getTokens());
         Node ast = parser.parse();
         if(parser.hadError == true)
             System.exit(400);
 
-        System.out.println("\n===== Interpreting =====\n");
+       // System.out.println("\n===== Interpreting =====\n");
         Interpreter interpreter = new Interpreter();
         interpreter.visit(ast);
 

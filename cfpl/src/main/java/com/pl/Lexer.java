@@ -11,6 +11,7 @@ import static java.lang.Character.*;
 public class Lexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<Token>();
+    private int ctr = 0;
     private Token currToken;
     private Position position;
     private static final Map<String, TokenType> reserved;
@@ -69,9 +70,7 @@ public class Lexer {
                 addToken(PLUS);
                 break;
             case '*':
-
-                if(getPrevCharacter() == '\n'){
-                    System.out.println("test");
+                if(tokens.get(ctr+1).getType().equals(NEWLINE)){
                     comment();
                 }else
                     addToken(MULTIPLY);
@@ -105,6 +104,8 @@ public class Lexer {
                 break;
             case '\r':
             case '\n':
+                addToken(NEWLINE);
+                break;
             case '\t':
             case ' ':
                 break;
@@ -129,14 +130,13 @@ public class Lexer {
     }
 
     private void integerOrFloat() {
-        System.out.println(position.getIndex());
-        TokenType t = INT;
+        TokenType tType = INT;
         int start = position.getIndex();
         while (isDigit(peek())) {
             nextCharacterFromSource();
         }
         if (peek() == '.' && isDigit(peekNext())) {
-            t = FLOAT;
+            tType = FLOAT;
             nextCharacterFromSource();
         }
 
@@ -146,11 +146,11 @@ public class Lexer {
 
         int end = position.getIndex();
 
-        if (t == INT) {
-            addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end);
+        if (tType == INT) {
+            addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end+1);
         }
-        else if (t == FLOAT) {
-            addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end);
+        else if (tType == FLOAT) {
+            addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end+1);
         }
     }
 
@@ -178,9 +178,9 @@ public class Lexer {
         }
         addToken(t, null, start-1, end);
     }
-
     private void addToken(TokenType type) {
         addToken(type, null, position.getIndex()-1, position.getIndex());
+        ctr++;
     }
 
     private void addToken(TokenType type, Object literal,int startPos,int endPos) {
@@ -252,19 +252,19 @@ public class Lexer {
     //addToken(COMMENT, null, start, end)
 
     private void comment() {
-        if(getPrevCharacter() == '\n'){
 
+        nextCharacterFromSource();
         int start = position.getIndex();
         while(!(getCurrentCharacter() == '\n'))
         {
-            nextCharacterFromSource();
-
+           nextCharacterFromSource();
         }
         int end = position.getIndex();
 
         addToken(COMMENT, source.substring(start-1, end), start-1, end);
-        }else{
+
+        /*else{
             return;
-        }
+        }*/
     }//end of comment
 }
