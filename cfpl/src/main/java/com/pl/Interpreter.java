@@ -95,13 +95,12 @@ public class Interpreter {
     
 
     public void visitNumberNode(NumberNode numNode){
-        //System.out.println("Found string node");
-        NumberNode ndR = ((NumberNode) numNode);
+        //NumberNode ndR = ((NumberNode) numNode);
         Object obj = numNode.getNum().getLiteral();
         System.out.println(obj);
     }
     public void visitStringNode(StringNode strNode){
-        StringNode ndR = strNode;
+        //StringNode ndR = strNode;
         output = strNode.getString().getLexeme();
         System.out.println(output);
     }

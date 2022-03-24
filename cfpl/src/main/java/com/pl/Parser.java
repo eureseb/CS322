@@ -1,16 +1,9 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
 package com.pl;
 
 import com.pl.Nodes.*;
 import com.pl.Statements.*;
 import static com.pl.TokenType.*;
 import java.util.List;
-
-import javax.xml.transform.Source;
 
 
 public class Parser {
@@ -167,7 +160,7 @@ public class Parser {
     }
 
     VariableDeclarationNode declareVar(){
-        Object var, datatype, as;
+        Object var, datatype;
         Token identifier;
 
         if(isValidVarDeclaration()){
