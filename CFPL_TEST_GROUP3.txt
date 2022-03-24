@@ -1,0 +1,5 @@
+VAR eurese AS INT
+VAR MELVIN AS BOOL
+START
+    *testin
+STOP

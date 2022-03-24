@@ -1,190 +1,270 @@
 package com.pl;
 
-import static com.pl.TokenType.*;
-
 import java.util.ArrayList;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-class Lexer {
-    private static final String[] symbol_list = {",", "+", "*", "/", "==", "(", ")", "=", "<=", ">=", "&"};
-    private int status = 0;
+import static com.pl.TokenType.*;
+import static java.lang.Character.*;
 
+public class Lexer {
+    private final String source;
+    private final List<Token> tokens = new ArrayList<Token>();
+    private Token currToken;
+    private Position position;
+    private static final Map<String, TokenType> reserved;
+    public boolean hadError = false; // temp
+    static {
+        reserved = new HashMap<>();
+        reserved.put("VAR", KW_VAR);
+        reserved.put("AS", KW_AS);
+        reserved.put("INT", KW_INT);
+        reserved.put("FLOAT", KW_FLOAT);
+        reserved.put("CHAR", KW_CHAR);
+        reserved.put("BOOL", KW_BOOLEAN);
+        reserved.put("START", KW_START);
+        reserved.put("STOP", KW_STOP);
+        reserved.put("OUTPUT", KW_OUTPUT);
+        reserved.put("IF", IF);
+        reserved.put("ELSE", ELSE);
+        reserved.put("AND", AND);
+        reserved.put("OR", OR);
+        reserved.put("WHILE", WHILE);
+    }
 
-     Pair<ArrayList<TokenType>, ArrayList<String>> getTokens(String stmt){
-        String statement = replaceStatement(stmt);
-        String[] tokens = statement.split(" ");
-        ArrayList<TokenType> tokenList = new ArrayList<TokenType>();
-        ArrayList<String> actualStringList = new ArrayList<String>();
+    Lexer(String source){
+        this.source = source;
+        this.position = new Position(0, 1, 0, source.length());
+        this.currToken = new Token(DEFAULT, "", null, 1);
+    }
 
-        int ctr = 0;
-        for(String token: tokens){
-            ctr++;
-            TokenType type = null;
-            if (!token.isBlank() ){
-                type = checkToken(token);
-            }
+    
+    public List<Token> scanTokens() {
 
-            if(type == TokenType.ERROR){
-                tokenList.clear();
-                tokenList.add(TokenType.ERROR);
+        while (!isAtEnd()) {
+            scanToken();
+        }
+        tokens.add(new Token(EOF, "", null, position.getLine()));
+
+        return tokens;
+    }
+    private void scanToken() {
+        char c = nextCharacterFromSource();
+        switch (c) {
+
+            case '(':
+                addToken(PAREN_OPEN);
                 break;
-            }
-            else {
-                tokenList.add(type);
-            }
-            actualStringList.add(token);
+            case ')':
+                addToken(PAREN_CLOSE);
+                break;
+            case ',':
+                addToken(COMMA);
+                break;
+            case '-':
+                addToken(MINUS);
+                break;
+            case '+':
+                addToken(PLUS);
+                break;
+            case '*':
 
-        }
-
-        return new Pair<ArrayList<TokenType>, ArrayList<String>>(tokenList, actualStringList);
-    }
-
-    TokenType checkToken(String token){
-        TokenType type = null;
-
-        if (isString(token)) {
-            type = TokenType.STRING;
-        }
-
-        if (isFloat(token)) {
-            type = TokenType.FLOAT;
-        }
-
-        else if (isInt(token)) {
-            type = TokenType.INT;
-        }
-        
-        else if (isAlpha(token)) {
-            if (type != null) {
-                if (parseAlpha(token) != null) {   
-                    type = parseAlpha(token);
+                if(getPrevCharacter() == '\n'){
+                    System.out.println("test");
+                    comment();
+                }else
+                    addToken(MULTIPLY);
+                break;
+            case '/':
+                addToken(DIVIDE);
+                break;
+            case '%':
+                addToken(MODULO);
+                break;
+            case ':':
+                addToken(COLON);
+                break;
+            case '&':
+                addToken(AND);
+                break;
+            case '>':
+                addToken(match('=') ? GREATER_OR_EQUAL : GREATER_THAN);
+                break;
+            case '<':
+                if (match('=')) {
+                    addToken(GREATER_OR_EQUAL);
+                } else if (match('>')) {
+                    addToken(NOT_EQUAL);
+                } else {
+                    addToken(LESS_THAN);
                 }
-            }
+                break;
+            case '=':
+                addToken(match('=') ? LOGICAL_EQUAL : EQUALS);
+                break;
+            case '\r':
+            case '\n':
+            case '\t':
+            case ' ':
+                break;
+            case '\'':
+                character();
+                break;
+            case '\"':
+                bool();
+                break;
+            default:
+                if (isDigit(c)) {
+                    integerOrFloat();
+                    break;
+                } else if (isAlphabetic(c)) {
+                    identifier();
+                    break;
+                }
+                error(position.getLine(), "Syntax error due to " + c);
+                break;
         }
 
-        else if (isSpecial(token)) {
-            type = parseSpecial(token);
-        }
-        
-        else {
-            type = TokenType.ERROR;
-        }
-
-        return type;
     }
 
-
-    TokenType parseAlpha(String token){
-        TokenType type = null;
-        if (token.equals("VAR")) {
-            type = KW_VAR;
-        }else if (token.equals("OUTPUT")) {
-            type = KW_AS;
-        }else if (token.equals("AS")) {
-            type = KW_AS;
-        }else if (token.equals("INT")) {
-            type = KW_INT;
-        }else if (token.equals("CHAR")) {
-            type = KW_CHAR;
-        }else if (token.equals("FLOAT")) {
-            type = KW_FLOAT;
-        }else if (token.equals("BOOL")) {
-            type = KW_BOOLEAN;
-        }else if (token.equals("START")) {
-            type = KW_START;
-        }else if (token.equals("STOP")) {
-            type = KW_STOP;
-        }else if (token.equals("OUTPUT")) {
-            type = KW_OUTPUT;
-        }else if (token.equals("AND")) {
-            type = AND;
-        }else if (token.equals("OR")) {
-            type = OR;
-        }else if (token.equals("NOT")) {
-            type = NOT;
-        }else if (token.equals("TRUE")) {
-            type = BOOL_TRUE;
-        }else if (token.equals("FALSE")) {
-            type = BOOL_FALSE;
-        }else if (isIdentifier(token)) {
-            type = IDENTIFIER;
+    private void integerOrFloat() {
+        System.out.println(position.getIndex());
+        TokenType t = INT;
+        int start = position.getIndex();
+        while (isDigit(peek())) {
+            nextCharacterFromSource();
         }
-        
-        return type;
+        if (peek() == '.' && isDigit(peekNext())) {
+            t = FLOAT;
+            nextCharacterFromSource();
+        }
+
+        while (isDigit(peek())) {
+            nextCharacterFromSource();
+        }
+
+        int end = position.getIndex();
+
+        if (t == INT) {
+            addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end);
+        }
+        else if (t == FLOAT) {
+            addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end);
+        }
     }
 
-    TokenType parseSpecial(String token){
-        TokenType type = null;
-        if (token.equals("&")) {
-            type = CONCATENATOR;
-        }else if (token.equals("=")) {
-            type = EQUALS;
-        }else if (token.equals("(")) {
-            type = PAREN_OPEN;
-        }else if (token.equals(")")) {
-            type = PAREN_CLOSE;
-        }else if (token.equals("+")) {
-            type = PLUS;
-        }else if (token.equals("-")) {
-            type = MINUS;
-        }else if (token.equals("*")) {
-            type = MULTIPLY;
-        }else if (token.equals("/")) {
-            type = DIVIDE;
-        }else if (token.equals("%")) {
-            type = MODULO;
-        }else if (token.equals("[")) {
-            type = ESCAPE_OPEN;
-        }else if (token.equals("]")) {
-            type = ESCAPE_CLOSE;
-        }else if (token.equals(">")) {
-            type = GREATER_THAN;
-        }else if (token.equals(">=")) {
-            type = GREATER_OR_EQUAL;
-        }else if (token.equals("<")) {
-            type = LESS_THAN;
-        }else if (token.equals("<=")) {
-            type = LESS_OR_EQUAL;
-        }else if (token.equals("==")) {
-            type = LOGICAL_EQUAL;
-        }else if (token.equals("!=")) {
-            type = NOT_EQUAL;
+    private void bool() {
+        while (peek() != '\"' && !isAtEnd()) {
+            nextCharacterFromSource();
+        }
+    }
+
+    private boolean isAlphaNumeric(char c) {
+        return isAlphabetic(c) || isDigit(c);
+    }
+
+    private void identifier() {
+        int start = position.getIndex();
+        while (isAlphaNumeric(peek())) {
+            nextCharacterFromSource();
+        }
+        int end = position.getIndex();
+
+        String s = source.substring(start-1, end);
+        TokenType t = reserved.get(s);
+        if (t == null){
+            t = IDENTIFIER;
+        }
+        addToken(t, null, start-1, end);
+    }
+
+    private void addToken(TokenType type) {
+        addToken(type, null, position.getIndex()-1, position.getIndex());
+    }
+
+    private void addToken(TokenType type, Object literal,int startPos,int endPos) {
+        String text = source.substring(startPos, endPos);
+        currToken = new Token(type, text, literal, position.getLine());
+        tokens.add(currToken);
+    }
+
+    private boolean match(char expected) {
+        if (isAtEnd())
+            return false;
+        if (source.charAt( position.getIndex() ) != expected)
+            return false;
+
+        position.advancePosition(getCurrentCharacter());
+        return true;
+    }
+
+    private void character() {
+        int start = position.getIndex();
+        while (peek() != '\'' && !isAtEnd()) {
+            nextCharacterFromSource();
+        }
+
+        // Unterminated string.
+        if (isAtEnd() || getCurrentCharacter() != '\'') {
+            error(position.getLine(), "Unterminated character.");
+            return;
+        }
+
+        // The closing '\''
+        nextCharacterFromSource();
+        int end = position.getIndex();
+        // Trim the surrounding quotes.
+        String value = source.substring(start + 1, end);
+        addToken(KW_CHAR, value, start+1, end);
+    }
+    private char peek() {
+        if (isAtEnd())
+            return '\0';
+        return getCurrentCharacter();
+    }
+    private char peekNext() {
+        if (position.getIndex() + 1 >= source.length())
+            return '\0';
+        return source.charAt(position.getIndex() + 1);
+    }
+
+    private void error(int line, String message) {
+        hadError = true;
+        System.out.println("[line: " + position.getLine() + "," + "col: "+ position.getCol() + "] Error" + getCurrentCharacter() + ": " + message);
+    }
+    private char nextCharacterFromSource() {
+        char currentCharacter = getCurrentCharacter();
+        position.advancePosition(currentCharacter);
+        return currentCharacter;
+    }
+    private char getCurrentCharacter(){
+        return source.charAt(position.getIndex());
+    }
+    private char getPrevCharacter() {return source.charAt(position.getIndex()-1);}
+    private boolean isAtEnd() {
+        return position.getIndex() >= source.length();
+    }
+    //if last.char == null || last.char == '\n'
+    //source.charAt(position.getIndex()-1).equals('\n')
+
+    //start =
+    //addToken(COMMENT, null, start, end)
+
+    private void comment() {
+        if(getPrevCharacter() == '\n'){
+
+        int start = position.getIndex();
+        while(!(getCurrentCharacter() == '\n'))
+        {
+            nextCharacterFromSource();
+
+        }
+        int end = position.getIndex();
+
+        addToken(COMMENT, source.substring(start-1, end), start-1, end);
         }else{
-            type = ERROR;
+            return;
         }
-        
-        return type;
-    }
-
-    String replaceStatement(String statement){
-        for(int i = 0; i < symbol_list.length; i++){
-            statement = statement.replace(symbol_list[i], ""+symbol_list[i]+"");
-        }
-        return statement.replace("= =", "==");
-    }
-    private boolean isString(String token){
-        return Pattern.matches("(.+?)", token);
-    }
-
-    private boolean isFloat(String token){
-        return Pattern.matches("-?\\d+\\.\\d+", token);
-    }
-
-    private boolean isInt(String token){
-        return Pattern.matches("(-?)\\d+", token);
-    }
-    
-    private boolean isSpecial(String token){
-        return Pattern.matches(".", token);
-    }
-
-    private boolean isAlpha(String token){
-        return Pattern.matches("^[a-zA-Z_$][a-zA-Z_$0-9]*$", token);
-    }
-
-    int getStatus(){
-        return this.status;
-    }
-
-    
+    }//end of comment
 }
