@@ -1,20 +1,11 @@
 package com.pl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
-import java.io.*;
 import java.util.List;
-import java.util.Scanner;
 import com.pl.Nodes.Node;
-import com.pl.Nodes.ProgramNode;
-
 
 public class LanguageTests {
     Lexer lexer;
