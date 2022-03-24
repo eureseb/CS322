@@ -10,12 +10,15 @@ import com.pl.Statements.*;
 import static com.pl.TokenType.*;
 import java.util.List;
 
+import javax.xml.transform.Source;
+
 
 public class Parser {
     List<Token> tokens;
     int ctr;
     Token currToken, temp;
     public boolean hadError = false;
+    Token errToken;
 
     public Parser(List<Token> tokens){
         this.tokens = tokens;
@@ -34,7 +37,6 @@ public class Parser {
     }
 
     Node parse(){
-        //Node ast = expression();
         ProgramNode ast = program();
         return ast;
     }
@@ -165,27 +167,28 @@ public class Parser {
     }
 
     VariableDeclarationNode declareVar(){
-        Object var, datatype;
+        Object var, datatype, as;
         Token identifier;
 
         if(isValidVarDeclaration()){
             var = currToken;
             identifier = advance();
-            advance();
-
+            advance(); // assuming AS
             TokenType currentDataType = advance().getType();
-
             if(isDataType(currentDataType)){
                 datatype = currToken;
+                advance(); // currToken = dataType -> '\n'
                 return new VariableDeclarationNode(var, identifier, datatype);
             }
             else{
-                System.out.println("Invalid data type.");
+                System.out.println("Invalid data type: incorrect data type");
                 hadError = true;
             }
         }
         else{
-            System.out.println("Invalid syntax");
+            Token iden = tokens.get(ctr+1);// provided iden
+            Token dt = tokens.get(ctr+4); // provided data type
+            System.out.println("Invalid variable declaration syntax: Got "+ iden.getLexeme() + " as identifier," + "Got " + dt.getType() + " as data type");
             hadError = true;
         }
         return null;
@@ -197,30 +200,70 @@ public class Parser {
         VariableDeclarationNode head = declareVar();
         VariableDeclarationNode curr= head;
         // assuming currently \n;
-        advance();      
+        while(currToken.getType().equals(NEWLINE)){
+            advance();
+        }     
         // assuming currently VAR or START;
         while (currToken.getType().equals(KW_VAR)){
-            curr.setNext(declareVar());
-            curr = curr.getNext();
-            advance();
+                curr.setNext(declareVar());
+                curr = curr.getNext();
+                advance();
             
         }
         return head;
     }
-
+    
+    void goToEof(){
+        while(!currToken.getType().equals(EOF)){
+            advance();
+        }
+    }
+    TokenType peekNextTokenType(){
+        return tokens.get(ctr+1).getType();
+    }
 
     ProgramNode program() {
         Node head_var = null;
         Object start = null, stop = null;
         Node head_statement = null;
-        if(currToken.getType().equals(KW_VAR)){ // Checking if start of program has var declaration
-            head_var = declareMultVars();
+        String errMsg = "";
+
+        if(currToken.getType().equals(KW_VAR)){
+                head_var = declareMultVars();
+        }
+        while(currToken.getType().equals(NEWLINE)){
+            advance();
         }
         if(currToken.getType().equals(KW_START)){ //Continue with START keyword
              start = currToken; // KW_START
-             advance(); // currTokenType = STOP
+            try{
+                if(peekNextTokenType().equals(EOF)){
+                    errMsg = "No STOP found";
+                    throw new RuntimeException();
+                }
+                else if(peekNextTokenType().equals(KW_STOP)){
+                    errMsg = "START and STOP cannot be 1 line";
+                    throw new RuntimeException();
+                }else if(!peekNextTokenType().equals(NEWLINE)){
+                    errMsg = peekNextTokenType()+" must be in a newline";
+                    throw new RuntimeException();
+                }else if(peekNextTokenType().equals(NEWLINE)){
+                    advance();
+                    while(currToken.getType().equals(NEWLINE)){
+                        advance();
+                    }
+                }
+                
+            }catch(RuntimeException e){
+                errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
+                System.out.println(errToken.getLexeme());
+                goToEof();
+
+            }
+             // currTokenType = STOP
              //add error handling here that does not allow anything after start
             if(!(currToken.isEofOrStop())){
+                
                 head_statement = declareMultStmts();
             }
 
@@ -229,20 +272,26 @@ public class Parser {
             }
             else{
                 if(hadError != true){
-                    System.out.println("Missing 'STOP' statement.");
+                    errToken.getLexeme();
                 }
                 hadError = true;
             }
          }
-         else{
+         else {
             if(hadError != true){
-                System.out.println("Missing 'START' statement.");
+                errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
+                System.out.println(errToken.getLexeme());
+                System.out.println("No START found");
             }
              hadError=true;
          }
-         ProgramNode progNode = new ProgramNode(head_var, start, head_statement, stop);
-         ProgramNode pNode = new ProgramNode(head_var, start, head_statement, stop);
-         return pNode;
+
+         if(hadError){
+             return null;
+         }else{
+             System.out.println("\n== Program Complete. No Errors ==\n");
+             return new ProgramNode(head_var, start, head_statement, stop);
+         }
     }
 
     private boolean isValidVarDeclaration(){

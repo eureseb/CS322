@@ -100,6 +100,8 @@ public class Lexer {
                 break;
             case '\r':
             case '\n':
+                addToken(NEWLINE);
+                break;
             case '\t':
             case ' ':
                 break;
@@ -124,14 +126,13 @@ public class Lexer {
     }
 
     private void integerOrFloat() {
-        System.out.println(position.getIndex());
-        TokenType t = INT;
+        TokenType tType = INT;
         int start = position.getIndex();
         while (isDigit(peek())) {
             nextCharacterFromSource();
         }
         if (peek() == '.' && isDigit(peekNext())) {
-            t = FLOAT;
+            tType = FLOAT;
             nextCharacterFromSource();
         }
 
@@ -141,11 +142,11 @@ public class Lexer {
 
         int end = position.getIndex();
 
-        if (t == INT) {
-            addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end);
+        if (tType == INT) {
+            addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end+1);
         }
-        else if (t == FLOAT) {
-            addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end);
+        else if (tType == FLOAT) {
+            addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end+1);
         }
     }
 
