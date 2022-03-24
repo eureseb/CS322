@@ -70,7 +70,11 @@ public class Lexer {
                 addToken(PLUS);
                 break;
             case '*':
-                if(tokens.get(ctr+1).getType().equals(NEWLINE)){
+                //
+                if(currToken.getType().equals(NEWLINE)){
+                    comment();
+                    break;
+                }else if(getPrevCharacter() == '*'){
                     comment();
                 }else
                     addToken(MULTIPLY);

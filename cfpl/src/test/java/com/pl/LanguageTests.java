@@ -103,11 +103,10 @@ public class LanguageTests {
     @Test
     void main_program_with_testing_comments(){
         System.out.println("\n=== Comments ===\n");
-        this.source = "VAR eurese AS INT\n" +
-                "VAR MELVIN AS BOOL\n" +
+        this.source ="*test4\n" +
+                "VAR MELVIN AS BOOL\n"+
                 "START\n" +
-                "*The end is near\n" +
-                "*The end is near\n" +
+                "*test3\n" +
                 "STOP";
     }
 }
