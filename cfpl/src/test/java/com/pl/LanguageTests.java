@@ -35,16 +35,6 @@ public class LanguageTests {
     }
 
     @Test
-    void main_program_with_testing_comments(){
-        System.out.println("\n=== 1Gr1 ===\n");
-        this.source = "VAR eurese AS INT\n" +
-                "VAR MELVIN AS BOOL\n" +
-                "START\n" +
-                "*testin\n" +
-                "*mel\n" +
-                "STOP";
-    }
-    @Test
     void main_program_with_1Gr1(){
         System.out.println("\n=== 1Gr1 ===\n");
         this.source = "STOP";
@@ -109,6 +99,15 @@ public class LanguageTests {
                         "STOP";
     }
     
-
-
+//INCREMENT 2 - TESTING
+    @Test
+    void main_program_with_testing_comments(){
+        System.out.println("\n=== Comments ===\n");
+        this.source = "VAR eurese AS INT\n" +
+                "VAR MELVIN AS BOOL\n" +
+                "START\n" +
+                "*The end is near\n" +
+                "*The end is near\n" +
+                "STOP";
+    }
 }

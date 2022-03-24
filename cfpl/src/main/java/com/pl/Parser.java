@@ -125,6 +125,8 @@ public class Parser {
                 System.out.println("Missing ':' after OUTPUT keyword");
                 hadError = true;
             }
+        }else if(currToken.getType().equals(COMMENT)) {
+
         }/*
         else if(currToken.type.equals(Token.TokenType.INPUT)){             //for input
 
@@ -135,7 +137,7 @@ public class Parser {
                 advance();
             }
             else{
-                System.out.println(currToken+" "+currToken.getLine());
+                System.out.println("token cc: " + currToken+" "+currToken.getLine());
                 hadError = true;
             }
         }
@@ -149,7 +151,10 @@ public class Parser {
 
         advance();
 
-        while(!(currToken.isEofOrStop()) && currToken.getType() != COMMENT){
+        while(currToken.getType().equals(NEWLINE)){
+            advance();
+        }
+        while(!(currToken.isEofOrStop())){
             curr.setNext(declareStmt());
             curr = curr.getNext();
             if(!currToken.getType().equals(KW_STOP)){
