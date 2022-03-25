@@ -1,6 +1,6 @@
 package com.pl;
 
-enum TokenType {
+public enum TokenType {
     // Keywords
     KW_START("KW_START"),
     KW_STOP("KW_STOP"),
@@ -21,6 +21,8 @@ enum TokenType {
     COMMENT_INIT("COMI"), // Value is (*)
     ESCAPE_OPEN("ESCO"), // Value is ([)
     ESCAPE_CLOSE("ESCC"), // Value is (])
+
+    COMMENT("COM"),
 
     //Values
 
@@ -84,7 +86,9 @@ enum TokenType {
     ST_INPUT("INPUT"),
 
     //End of file
-    EOF("FILE_END");
+    EOF("FILE_END"),
+    DEFAULT("DEF");
+
     private final String value;
 
     TokenType(String value){
@@ -95,7 +99,17 @@ enum TokenType {
         return value;
     }
 
-    static boolean isIdentifier(String token){
+    public static boolean isIdentifier(String token){
         return token == "IDEN";
+    }
+
+    public static boolean isDataType(TokenType tokenType){
+        if(tokenType == KW_INT ||
+           tokenType == KW_FLOAT ||
+           tokenType == KW_BOOLEAN ||
+           tokenType == KW_CHAR){
+               return true;
+           }
+        return false; 
     }
 }
