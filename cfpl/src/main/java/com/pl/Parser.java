@@ -226,27 +226,23 @@ public class Parser {
         Node head_statement = null;
         String errMsg = "";
 
-        //current issue with comment is that it never goes to find the START
-        //System.out.println("currToken: "+currToken.getType());
+
         if(currToken.getType().equals(COMMENT)){
             advance();
         }
 
-        //System.out.println("middleToken: "+currToken.getType());
         if(currToken.getType().equals(NEWLINE)) {//temp workaround for comment
             advance();
         }
 
         if(currToken.getType().equals(KW_VAR)){
                 head_var = declareMultVars();
-                System.out.println("mid Token: "+currToken.getType());
         }
-       // System.out.println("semiToken: "+currToken.getType());
+
         while(currToken.getType().equals(NEWLINE)){
             advance();
         }
 
-       // System.out.println("lastToken: "+currToken.getType());
         if(currToken.getType().equals(KW_START)){ //Continue with START keyword
              start = currToken; // KW_START
             try{
