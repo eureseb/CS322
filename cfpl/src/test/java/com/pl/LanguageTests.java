@@ -89,6 +89,8 @@ public class LanguageTests {
         this.source = "VAR a AS INT\n"+
                         "VAR b AS INT\n"+
                     "START\n"+
+                    "OUTPUT: x\n"+
+                    "x = 1 + 1\n"+
                     "STOP";
     }
     @Test
