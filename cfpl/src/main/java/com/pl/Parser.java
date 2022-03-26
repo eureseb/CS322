@@ -47,6 +47,10 @@ public class Parser {
             advance();
             return new NumberNode(temp);
         }
+        else if(currToken.getType().equals(IDENTIFIER)){
+            advance();
+            return new NumberNode(temp);
+        }
         else if(currToken.getType().equals(PAREN_OPEN)){
             advance();
             nodeExpr = expression();
@@ -86,61 +90,89 @@ public class Parser {
     }
 
     Statement declareStmt(){
-        Token temp = currToken, operator;
+        Token iden, operator;
+        Token toPrint = null;
+        Token temp = currToken;
+//        String concatStr = "";
+        String errMsg = "";
         Node nodeExpr;
 
-        if(currToken.getType().equals(IDENTIFIER)){
+        try{
+            if(currToken.getType().equals(IDENTIFIER)){
 
-            advance();
-            if(currToken.getType().equals(EQUALS)){
-                operator = currToken;
                 advance();
-                nodeExpr = expression();
-                //return new Node.AssignNode(temp, operator, nodeExpr);
-                return new AssignStatement(temp, operator, nodeExpr);
-            }
-            else{
-                System.out.println("Expected '=' after identifier");
-                hadError = true;
-            }
-        }
-        else if(currToken.getType().equals(KW_OUTPUT)){
-            advance();
-            if(currToken.getType().equals(COLON)){
-                //operator = currToken;                 //COLON symbol would not be included in the AST
-                advance();
-                //should allow: expressions (literal, unary, binary) , string, concatenated string
-
-                //TO DO!!!!! allow printing of values of an identifier
-
-                if(currToken.getType().equals(STRING) ){
-                    return new OutputStatement(temp, new StringNode(currToken));
-                }
-                else{                                                       //if not string, call expression to check and leave there to error
+                if(currToken.getType().equals(EQUALS)){
+                    operator = currToken;
+                    advance();
                     nodeExpr = expression();
-                    return new OutputStatement(temp, nodeExpr);
+                    //return new Node.AssignNode(temp, operator, nodeExpr);
+                    return new AssignStatement(temp, operator, nodeExpr);
+                }
+                else{
+                    throw new IllegalStatementException("Expected '=' after identifier at line" + currToken.getLine());
                 }
             }
-            else{
-                System.out.println("Missing ':' after OUTPUT keyword");
-                hadError = true;
-            }
-        }else if(currToken.getType().equals(COMMENT)) {
-
-        }/*
-        else if(currToken.type.equals(Token.TokenType.INPUT)){             //for input
-
-        }*/
-        else{
-            //BRUTE FORCE !!!!
-            if(currToken.getType().equals(NEWLINE)){
+            else if(currToken.getType().equals(KW_OUTPUT)){
                 advance();
+                
+                if(currToken.getType().equals(COLON)){
+                    //operator = currToken;                 //COLON symbol would not be included in the AST
+                    advance();
+                    //should allow: expressions (literal, unary, binary) , string, concatenated string
+    
+                    //TO DO!!!!! allow printing of values of an identifier
+    
+                    if(currToken.getType().equals(STRING) ){
+                        toPrint = currToken;
+                        advance(); // NEW LINE NI.
+//                        concatStr = toPrint.getLexeme();
+                        return new OutputStatement(temp, new StringNode(toPrint));
+                    }
+                    else{                                                       //if not string, call expression to check and leave there to error
+                        nodeExpr = expression();
+                        return new OutputStatement(temp, nodeExpr);
+                    }
+                }
+                
+                else{
+                    throw new IllegalStatementException("Missing ':' after OUTPUT keyword");
+                    
+                }
+            }
+            else if(currToken.getType().equals(KW_INPUT)){           //for input
+                advance();
+                if(currToken.getType().equals(COLON)){
+                    advance();
+    
+                    if(currToken.getType().equals(IDENTIFIER) ){          // if string
+                        iden = currToken;
+                        advance();
+                        return new InputStatement(temp, iden);
+                    }
+                    else{
+                        throw new IllegalStatementException("Expecting identifier at line "+currToken.getLine());
+                    }
+                }
+                else{
+                    throw new IllegalStatementException("Missing ':' after INPUT keyword at line "+currToken.getLine());
+                }
+            }
+            else if(currToken.getType().equals(COMMENT)) {
+    
             }
             else{
-                System.out.println("token cc: " + currToken+" "+currToken.getLine());
-                hadError = true;
+                //BRUTE FORCE !!!!
+                if(currToken.getType().equals(NEWLINE)){
+                    advance();
+                }
+                else{
+                    throw new IllegalStatementException("Error: Current token: " + currToken + " at line " + currToken.getLine());
+                }
             }
+        }catch(Exception e){
+            System.out.println(e.getMessage());
         }
+
         return null;
     }
 
@@ -160,13 +192,13 @@ public class Parser {
             if(!currToken.getType().equals(KW_STOP)){
                 advance();
             }
+
         }
         return stmtHead;
     }
 
     VariableDeclarationNode declareVar(){
-        Object var, datatype;
-        Token identifier;
+        Token var, datatype, identifier;
 
         if(isValidVarDeclaration()){
             var = currToken;
@@ -186,6 +218,8 @@ public class Parser {
         else{
             Token iden = tokens.get(ctr+1);// provided iden
             Token dt = tokens.get(ctr+4); // provided data type
+
+            System.out.println("it returns null1");
             System.out.println("Invalid variable declaration syntax: Got "+ iden.getLexeme() + " as identifier," + "Got " + dt.getType() + " as data type");
             hadError = true;
         }
@@ -265,6 +299,8 @@ public class Parser {
                 
             }catch(RuntimeException e){
                 errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
+
+                System.out.println("it returns null2");
                 System.out.println(errToken.getLexeme());
                 goToEof();
 
@@ -272,15 +308,19 @@ public class Parser {
              // currTokenType = STOP
              //add error handling here that does not allow anything after start
             if(!(currToken.isEofOrStop())){
-                
+                System.out.println(currToken + " at line " + currToken.getLine() );
                 head_statement = declareMultStmts();
+                System.out.println(currToken + " at line " + currToken.getLine() );
             }
 
             if(currToken.getType().equals(KW_STOP)){
                 stop = currToken;
             }
             else{
+
                 if(hadError != true){
+
+                    System.out.println("it returns null3");
                     errToken.getLexeme();
                 }
                 hadError = true;
@@ -290,6 +330,8 @@ public class Parser {
          else {
             if(hadError != true){
                 errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
+
+                System.out.println("it returns null4");
                 System.out.println(errToken.getLexeme());
                 System.out.println("No START found");
             }

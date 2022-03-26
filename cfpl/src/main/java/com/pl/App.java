@@ -12,7 +12,7 @@ public class App
         String source = "";    
 
         //please change depending on environment
-        File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322Temp\\CFPL_TEST_GROUP3.txt");
+        File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
         
         try(Scanner fileScanner = new Scanner(file)){
             while(fileScanner.hasNextLine()){
@@ -21,11 +21,13 @@ public class App
                                                             ""); // FOR EOF;
             }
         }
-        
+
         //System.out.println("\n===== Lexing =====\n");
         Lexer lexer = new Lexer(source);
         List<Token> tokens = lexer.scanTokens();
-        //System.out.println(tokens);
+        Node ast;
+        Interpreter interpreter;
+        System.out.println(tokens);
         if(lexer.hadError == true){
             System.exit(500);
         }
@@ -33,14 +35,24 @@ public class App
        // System.out.println("\n===== Parsing =====\n");
         Parser parser = new Parser(tokens);
        // System.out.println(parser.getTokens());
-        Node ast = parser.parse();
-        if(parser.hadError == true)
-            System.exit(400);
+        try {
+            lexer = new Lexer(source);
+            tokens = lexer.scanTokens();
+            // System.out.println("lexer tokens: "+ tokens);
+            parser = new Parser(tokens);
+            ast = parser.parse();
+            interpreter = new Interpreter();
+            // System.out.println("AST:" + ast +"\n");
+            interpreter.visit(ast);
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+            System.out.println("Error in parser");
+        }
+
+
 
        // System.out.println("\n===== Interpreting =====\n");
-        Interpreter interpreter = new Interpreter();
-        interpreter.visit(ast);
-
+        
     
     }
 }

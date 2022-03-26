@@ -2,6 +2,7 @@ package com.pl;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -10,6 +11,7 @@ import com.pl.Nodes.Node;
 public class LanguageTests {
     Lexer lexer;
     List<Token> tokens;
+    Interpreter interpreter;
     Parser parser;
     Node ast;
     String source;
@@ -25,10 +27,12 @@ public class LanguageTests {
         try {
             lexer = new Lexer(this.source);
         tokens = lexer.scanTokens();
-        System.out.println("lexer tokens: "+ tokens);
+        // System.out.println("lexer tokens: "+ tokens);
         parser = new Parser(tokens);
             ast = parser.parse();
-            System.out.println("AST:" + ast +"\n");
+            interpreter = new Interpreter();
+            // System.out.println("AST:" + ast +"\n");
+            interpreter.visit(ast);
         }catch(Exception e){
             System.out.println("Error in parser");
         }
@@ -89,8 +93,6 @@ public class LanguageTests {
         this.source = "VAR a AS INT\n"+
                         "VAR b AS INT\n"+
                     "START\n"+
-                    "OUTPUT: x\n"+
-                    "x = 1 + 1\n"+
                     "STOP";
     }
     @Test
@@ -110,5 +112,15 @@ public class LanguageTests {
                 "START\n" +
                 "*test3\n" +
                 "STOP";
+    }
+    @Test
+    @Disabled
+    void main_program_with_input(){
+        System.out.println("\n=== Input Test ===\n");
+        this.source = "VAR eurese AS INT\n" +
+        "START\n" +
+        "INPUT: eurese\n" +
+        "OUTPUT: eurese\n" +
+        "STOP";
     }
 }
