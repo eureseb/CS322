@@ -26,6 +26,7 @@ public class Lexer {
         reserved.put("BOOL", KW_BOOLEAN);
         reserved.put("START", KW_START);
         reserved.put("STOP", KW_STOP);
+        reserved.put("INPUT", KW_INPUT);
         reserved.put("OUTPUT", KW_OUTPUT);
         reserved.put("IF", IF);
         reserved.put("ELSE", ELSE);
@@ -117,7 +118,7 @@ public class Lexer {
                 character();
                 break;
             case '\"':
-                bool();
+                string();
                 break;
             default:
                 if (isDigit(c)) {
@@ -158,10 +159,20 @@ public class Lexer {
         }
     }
 
-    private void bool() {
-        while (peek() != '\"' && !isAtEnd()) {
+    private void string() {
+        int start = position.getIndex();
+        while (peek() != '\"' && peekNext() != '\n' && !isAtEnd()) {
             nextCharacterFromSource();
         }
+        nextCharacterFromSource();
+        int end = position.getIndex();
+        String s = source.substring(start-1, end);
+        TokenType t = reserved.get(s);
+        if (t == null){
+            t = STRING;
+        }
+
+        addToken(t, s, start, end-1);
     }
 
     private boolean isAlphaNumeric(char c) {
@@ -180,14 +191,14 @@ public class Lexer {
         if (t == null){
             t = IDENTIFIER;
         }
-        addToken(t, null, start-1, end);
+        addToken(t, s, start-1, end);
     }
     private void addToken(TokenType type) {
         addToken(type, null, position.getIndex()-1, position.getIndex());
         ctr++;
     }
 
-    private void addToken(TokenType type, Object literal,int startPos,int endPos) {
+    private void addToken(TokenType type, Object literal , int startPos, int endPos) {
         String text = source.substring(startPos, endPos);
         currToken = new Token(type, text, literal, position.getLine());
         tokens.add(currToken);

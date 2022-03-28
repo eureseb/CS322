@@ -17,7 +17,7 @@ public class AssignStatement extends Statement {
     public Node getRight(){
         return this.right;
     }
-
+    public Token getIdentifier() { return this.identifier; }
     @Override
     public String toString() {
         return "(" + identifier + ", " + operator + ", " + right + ')'+"\n"+ super.getNext();

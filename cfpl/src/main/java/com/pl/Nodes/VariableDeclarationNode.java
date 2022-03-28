@@ -1,22 +1,34 @@
 package com.pl.Nodes;
 
-//previously: varDeclareNode
+import com.pl.Token;
+
 public class VariableDeclarationNode extends Node {
-    private final Object reserveword;
-    private final Object identifier;
-    private final Object datatype;
+    private Token reserveword;
+    private Token identifier;
+    private Token dataType;
     private VariableDeclarationNode next = null;
 
     public VariableDeclarationNode(VariableDeclarationNode node) {
         this.reserveword = node.reserveword;
         this.identifier = node.identifier;
-        this.datatype = node.datatype;
+        this.dataType = node.dataType;
     }
 
-    public VariableDeclarationNode(Object reserveword, Object identifier, Object datatype) {
+    public VariableDeclarationNode(Token reserveword, Token identifier, Token datatype) {
         this.reserveword = reserveword;
         this.identifier = identifier;
-        this.datatype = datatype;
+        this.dataType = datatype;
+    }
+
+
+    public Token dataType(){
+        return dataType;
+    }
+    public Token getIdentifier(){
+        return identifier;
+    }
+    public Token getReserveWord(){
+        return reserveword;
     }
 
     public void setNext(VariableDeclarationNode next){
@@ -26,6 +38,6 @@ public class VariableDeclarationNode extends Node {
         return this.next;
     }
     public String toString() {
-        return "(" + this.reserveword + ", " + this.identifier + ", " + this.datatype + "\n" + this.next + ")";
+        return "(" + this.reserveword + ", " + this.identifier + ", " + this.dataType + "\n" + this.next + ")";
     }
 }

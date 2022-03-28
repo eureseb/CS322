@@ -1,5 +1,5 @@
 VAR eurese AS INT
-VAR MELVIN AS BOOL
 START
-*testing
+INPUT: eurese
+OUTPUT: eurese + 2
 STOP
