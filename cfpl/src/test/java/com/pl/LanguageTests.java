@@ -87,20 +87,19 @@ public class LanguageTests {
     void main_program_with_6Gr1(){
         System.out.println("\n=== 6Gr1 ===\n");
         this.source = "VAR a AS INT\n"+
-                        "VAR b AS INT\n"+
+                    "VAR b AS INT\n"+
                     "START\n"+
-                    "OUTPUT: x\n"+
-                    "x = 1 + 1\n"+
                     "STOP";
     }
     @Test
-    void main_program_with_7Gr1(){
-        System.out.println("\n=== 7Gr1 ===\n");
-        this.source = "VAR 1x AS BOOL\n"+
-                        "START\n"+
-                        "STOP";
+    void main_program_with_10St1(){
+        System.out.println("\n=== 10Gr1 ===\n");
+        this.source = " VAR abc,b, c AS INT\n"+
+                      "START\n"+
+                      "VAR t=\"TRUE  AS BOOL" +
+                      "STOP";
     }
-    
+
 //INCREMENT 2 - TESTING
     @Test
     void main_program_with_testing_comments(){
