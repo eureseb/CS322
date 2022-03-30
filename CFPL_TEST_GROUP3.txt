@@ -1,5 +1,7 @@
-VAR eurese AS INT
+*kimi no todoke
+VAR a AS INT
+VAR b AS BOOL
+*testing
 START
-INPUT: eurese
-OUTPUT: eurese + 2
+*BULAN, MELVIN S.
 STOP

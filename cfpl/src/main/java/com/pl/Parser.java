@@ -265,12 +265,16 @@ public class Parser {
             advance();
         }
 
-        if(currToken.getType().equals(NEWLINE)) {//temp workaround for comment
+        if(currToken.getType().equals(NEWLINE)) {//
             advance();
         }
 
         if(currToken.getType().equals(KW_VAR)){
                 head_var = declareMultVars();
+        }
+
+        if(currToken.getType().equals(COMMENT)){
+            advance();
         }
 
         while(currToken.getType().equals(NEWLINE)){
