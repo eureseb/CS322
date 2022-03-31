@@ -1,5 +1,6 @@
 VAR eurese AS INT
 START
+* this is a comment
 INPUT: eurese
-OUTPUT: eurese + 2
+OUTPUT: eurese
 STOP
