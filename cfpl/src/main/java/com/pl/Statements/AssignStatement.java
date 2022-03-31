@@ -18,6 +18,11 @@ public class AssignStatement extends Statement {
         return this.right;
     }
     public Token getIdentifier() { return this.identifier; }
+
+    public Token getOperator() {
+        return operator;
+    }
+
     @Override
     public String toString() {
         return "(" + identifier + ", " + operator + ", " + right + ')'+"\n"+ super.getNext();

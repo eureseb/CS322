@@ -19,6 +19,7 @@ public class Interpreter {
     public Interpreter(){}
     public Object visit(Node node){
 //        System.out.println(node.getClass().toString());
+
         if(node == null){
         }
         else if(classNameOf(node).equals("class com.pl.Nodes.ProgramNode")){
@@ -32,6 +33,7 @@ public class Interpreter {
         }
         else if(classNameOf(node).equals("class com.pl.Statements.OutputStatement")){
             visitOutputStmt((OutputStatement)node);
+
         }
         else if(classNameOf(node).equals("class com.pl.Statements.InputStatement")){
             visitInputStmt((InputStatement)node);
@@ -68,7 +70,6 @@ public class Interpreter {
         ProgramNode ndR = progNode;
         visit(ndR.getVarDeclarations());
         visit(ndR.getStmtDeclaration());
-        System.out.println(values);
     }
 
     public void visitVarDeclareNode(VariableDeclarationNode varDecNode){
@@ -102,17 +103,13 @@ public class Interpreter {
 
     public void visitOutputStmt(OutputStatement outNode){
         OutputStatement ndR = outNode;
-//        System.out.println(outNode);
-        Object ndrRight = visit(ndR.getRight());
-        if(ndrRight != null){
-            System.out.println("printed to : " + ndrRight);
-        }
-        else{
-            System.out.println("ndr to" + ndR.getString());
-        }
+        Object outputobj = visit(ndR.getHeadConcat());
+        System.out.println(outputobj);
+        Node currStrNode = ndR.getHeadConcat();
 
-        if(ndR.getNext() != null){
-            visit(ndR.getNext());
+        while(currStrNode.next != null){
+            System.out.println(visit(currStrNode.next));
+            currStrNode = currStrNode.next;
         }
     }
 
@@ -168,15 +165,47 @@ public class Interpreter {
     
     public Object visitUnaryNode(UnaryNode unaryNode){
         UnaryNode ndR = unaryNode;
-        visit(ndR.getNum());
-        return null;
+        Object num = visit(ndR.getNum());
+        Object unary = null;
+        if(ndR.getOperator().getType() == MINUS){
+            //unary = Integer.parseInt("-"+num.toString());
+            unary = -(int)num;
+        }
+        else if(ndR.getOperator().getType() == PLUS){
+            unary = (int)num;
+        }
+
+        return unary;
     }
 
     public Object visitBinaryNode(BinaryNode binNode){
         BinaryNode ndR = binNode;
-        visit(ndR.getLeft());
-        visit(ndR.getRight());
-        return null;
+
+        Object left = visit(ndR.getLeft());
+        Object right = visit(ndR.getRight());
+        Object output = null;
+
+        if(ndR.getOperator().getType() == PLUS){
+            output = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
+        }
+        else if(ndR.getOperator().getType() == MINUS){
+            output = Float.parseFloat(left.toString()) - Float.parseFloat(right.toString());
+        }
+        else if(ndR.getOperator().getType() == MULTIPLY){
+            output = Float.parseFloat(left.toString()) * Float.parseFloat(right.toString());
+        }
+        else if(ndR.getOperator().getType() == DIVIDE){
+            output = Float.parseFloat(left.toString()) / Float.parseFloat(right.toString());
+        }
+        else{
+
+        }
+
+        if(left instanceof Integer && right instanceof Integer){
+            output = (int)((float)output);
+        }
+
+        return output;
     }
 
     public Object visitNumberNode(NumberNode numNode){
@@ -192,12 +221,10 @@ public class Interpreter {
         else{
             literal = numNode.getNum().getLiteral();
         }
-
         return literal;
     }
+
     public String visitStringNode(StringNode strNode){
-        output = strNode.getString().getLexeme();
-//        System.out.println("called visit string ndoe");
-        return output;
+        return strNode.getString().getLexeme();
     }
 }

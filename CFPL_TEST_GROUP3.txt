@@ -1,7 +1,5 @@
     *日本
     *日本
-    *日本
-    *日本
 VAR a AS INT
 VAR b AS BOOL
     *testing
@@ -11,7 +9,7 @@ START
     *疲れた.
     *きつい.
     *何時.
-    *地下鉄.
+    a = 10
     INPUT: b
-    OUTPUT: b
+    OUTPUT: 1 & a & 10 & "hello world"
 STOP

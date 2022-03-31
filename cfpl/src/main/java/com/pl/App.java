@@ -27,7 +27,7 @@ public class App
         List<Token> tokens = lexer.scanTokens();
         Node ast;
         Interpreter interpreter;
-        System.out.println(tokens);
+//        System.out.println(tokens);
         if(lexer.hadError == true){
             System.exit(500);
         }
@@ -38,21 +38,18 @@ public class App
         try {
             lexer = new Lexer(source);
             tokens = lexer.scanTokens();
-            // System.out.println("lexer tokens: "+ tokens);
+//             System.out.println("lexer tokens: "+ tokens);
             parser = new Parser(tokens);
             ast = parser.parse();
             interpreter = new Interpreter();
-            // System.out.println("AST:" + ast +"\n");
+//             System.out.println("AST:" + ast +"\n");
             interpreter.visit(ast);
         }catch(Exception e){
             System.out.println(e.getMessage());
             System.out.println("Error in parser");
         }
 
-
-
-       // System.out.println("\n===== Interpreting =====\n");
-        
+       // System.out.println("\n===== Interpreting =====\n")
     
     }
 }

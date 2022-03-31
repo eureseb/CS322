@@ -89,6 +89,13 @@ public class Parser {
         return left;
     }
 
+    public Node concatenator(Node curr, Node nextNode){
+        curr.next = nextNode;
+        curr = nextNode;
+
+        return curr;
+    }
+
     Statement declareStmt(){
         Token iden, operator;
         Token toPrint = null;
@@ -105,8 +112,13 @@ public class Parser {
                     operator = currToken;
                     advance();
                     nodeExpr = expression();
-                    //return new Node.AssignNode(temp, operator, nodeExpr);
-                    return new AssignStatement(temp, operator, nodeExpr);
+
+                    if(currToken.getType() == NEWLINE){
+                        return new AssignStatement(temp, operator, nodeExpr);
+                    }
+                    else {
+                        System.out.println("expected newline, but got a something else needs implementation");
+                    }
                 }
                 else{
                     throw new IllegalStatementException("Expected '=' after identifier at line" + currToken.getLine());
@@ -114,24 +126,35 @@ public class Parser {
             }
             else if(currToken.getType().equals(KW_OUTPUT)){
                 advance();
-                
+                OutputStatement outputStatement = new OutputStatement(temp);
+                Node currNode;
                 if(currToken.getType().equals(COLON)){
                     //operator = currToken;                 //COLON symbol would not be included in the AST
                     advance();
                     //should allow: expressions (literal, unary, binary) , string, concatenated string
-    
-                    //TO DO!!!!! allow printing of values of an identifier
-    
+
                     if(currToken.getType().equals(STRING) ){
-                        toPrint = currToken;
-                        advance(); // NEW LINE NI.
-//                        concatStr = toPrint.getLexeme();
-                        return new OutputStatement(temp, new StringNode(toPrint));
+                        outputStatement.setHeadConcat(new StringNode(currToken));
+                        advance();
                     }
                     else{                                                       //if not string, call expression to check and leave there to error
+
                         nodeExpr = expression();
-                        return new OutputStatement(temp, nodeExpr);
+                        outputStatement.setHeadConcat(nodeExpr);
                     }
+                    currNode = outputStatement.getHeadConcat();
+
+                    while (currToken.getType().equals(AND)){
+                        advance();
+                        if(currToken.getType().equals(STRING)){
+                            currNode = concatenator(currNode, new StringNode(currToken));
+                            advance();
+                        }
+                        else{
+                            currNode = concatenator(currNode, expression());
+                        }
+                    }
+                    return outputStatement;
                 }
                 
                 else{
@@ -324,9 +347,7 @@ public class Parser {
              // currTokenType = STOP
              //add error handling here that does not allow anything after start
             if(!(currToken.isEofOrStop())){
-                System.out.println(currToken + " at line " + currToken.getLine() );
                 head_statement = declareMultStmts();
-                System.out.println(currToken + " at line " + currToken.getLine() );
             }
 
             if(currToken.getType().equals(KW_STOP)){
