@@ -1,7 +1,17 @@
-*kimi no todoke
+    *日本
+    *日本
+    *日本
+    *日本
 VAR a AS INT
 VAR b AS BOOL
-*testing
+    *testing
+    *testing
 START
-*BULAN, MELVIN S.
+    *BULAN, MELVIN S.
+    *疲れた.
+    *きつい.
+    *何時.
+    *地下鉄.
+    INPUT: b
+    OUTPUT: b
 STOP

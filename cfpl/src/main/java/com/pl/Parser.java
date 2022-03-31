@@ -158,7 +158,7 @@ public class Parser {
                 }
             }
             else if(currToken.getType().equals(COMMENT)) {
-    
+
             }
             else{
                 //BRUTE FORCE !!!!
@@ -265,8 +265,12 @@ public class Parser {
             advance();
         }
 
-        if(currToken.getType().equals(NEWLINE)) {//
+        while(currToken.getType().equals(NEWLINE)){
             advance();
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+                System.out.println("testing");
+            }
         }
 
         if(currToken.getType().equals(KW_VAR)){
@@ -279,6 +283,10 @@ public class Parser {
 
         while(currToken.getType().equals(NEWLINE)){
             advance();
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+                System.out.println("testing");
+            }
         }
 
         if(currToken.getType().equals(KW_START)){ //Continue with START keyword
@@ -298,6 +306,10 @@ public class Parser {
                     advance();
                     while(currToken.getType().equals(NEWLINE)){
                         advance();
+                       if(currToken.getType().equals(COMMENT)){
+                            advance();
+                            System.out.println("testing");
+                        }
                     }
                 }
                 
