@@ -1,6 +1,5 @@
-*kimi no todoke
 VAR a AS INT
-VAR b AS BOOL
-*testing
 START
+a = 10
+OUTPUT: 1 & a & 10 & "hello world"
 STOP

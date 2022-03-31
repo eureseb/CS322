@@ -12,7 +12,7 @@ public class App
         String source = "";    
 
         //please change depending on environment
-        File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322Temp\\CFPL_TEST_GROUP3.txt");
+        File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
         
         try(Scanner fileScanner = new Scanner(file)){
             while(fileScanner.hasNextLine()){
@@ -27,7 +27,7 @@ public class App
         List<Token> tokens = lexer.scanTokens();
         Node ast;
         Interpreter interpreter;
-        System.out.println(tokens);
+//        System.out.println(tokens);
         if(lexer.hadError == true){
             System.exit(500);
         }
@@ -38,11 +38,11 @@ public class App
         try {
             lexer = new Lexer(source);
             tokens = lexer.scanTokens();
-            // System.out.println("lexer tokens: "+ tokens);
+//             System.out.println("lexer tokens: "+ tokens);
             parser = new Parser(tokens);
             ast = parser.parse();
             interpreter = new Interpreter();
-            // System.out.println("AST:" + ast +"\n");
+//             System.out.println("AST:" + ast +"\n");
             interpreter.visit(ast);
         }catch(Exception e){
             System.out.println(e.getMessage());

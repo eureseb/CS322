@@ -5,27 +5,37 @@ import com.pl.Nodes.Node;
 
 public class OutputStatement extends Statement{
     Token rsrvOutput;
-    String string = "hello default world";
-    Node right;             //expression
+    Node headConcat;             //expression
 
-    public OutputStatement(Token rsrvOutput, Node right){
+    public OutputStatement(Token rsrvOutput, Node headConcat){
         this.rsrvOutput = rsrvOutput;
-        this.right = right;
+        this.headConcat = headConcat;
     }
-    public OutputStatement(Token rsrvOutput, String string){
+    public OutputStatement(Token rsrvOutput){
         this.rsrvOutput = rsrvOutput;
-        this.string= string;
     }
 
-    public String getString() {
-        return string;
+    public Token getRsrvOutput() {
+        return rsrvOutput;
     }
 
-    public Node getRight(){
-        return this.right;
+    public void setRsrvOutput(Token rsrvOutput) {
+        this.rsrvOutput = rsrvOutput;
     }
+
+    public Node getHeadConcat() {
+        return headConcat;
+    }
+
+    public void setHeadConcat(Node headConcat) {
+        this.headConcat = headConcat;
+    }
+
     @Override
     public String toString() {
-        return "(" + rsrvOutput + ", " + right + ')'+"\n"+super.getNext();
+        return "OutputStatement{" +
+                "rsrvOutput=" + rsrvOutput +
+                ", headConcat=" + headConcat +
+                '}';
     }
 }
