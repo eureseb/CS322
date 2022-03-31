@@ -1,6 +1,6 @@
-VAR eurese AS INT
+*kimi no todoke
+VAR a AS INT
+VAR b AS BOOL
+*testing
 START
-* this is a comment
-INPUT: eurese
-OUTPUT: eurese
 STOP
