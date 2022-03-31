@@ -331,7 +331,6 @@ public class Parser {
                         advance();
                        if(currToken.getType().equals(COMMENT)){
                             advance();
-                            System.out.println("testing");
                         }
                     }
                 }
