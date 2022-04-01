@@ -18,7 +18,8 @@ public class Parser {
         ctr = -1;
         advance();
     }
-   
+
+
     private Token advance(){
         this.ctr += 1;
         if(ctr < tokens.size()){
@@ -135,6 +136,7 @@ public class Parser {
 
                     if(currToken.getType().equals(STRING) ){
                         outputStatement.setHeadConcat(new StringNode(currToken));
+                       // System.out.println(new StringNode(currToken));
                         advance();
                     }
                     else{                                                       //if not string, call expression to check and leave there to error
@@ -292,7 +294,6 @@ public class Parser {
             advance();
             if(currToken.getType().equals(COMMENT)){
                 advance();
-                System.out.println("testing");
             }
         }
 
@@ -308,7 +309,7 @@ public class Parser {
             advance();
             if(currToken.getType().equals(COMMENT)){
                 advance();
-                System.out.println("testing");
+
             }
         }
 

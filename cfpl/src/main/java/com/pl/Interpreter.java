@@ -101,6 +101,16 @@ public class Interpreter {
         }
     }
 
+    /*public void visitIfClause(Node node){
+        IfClause ndR = ((IfClause) node);
+
+        visit(ndR.ifStmtHead);
+
+        if(ndR.next != null){
+            visit(ndR.next);
+        }
+    }*/
+
     public void visitOutputStmt(OutputStatement outNode){
         OutputStatement ndR = outNode;
         Object outputobj = visit(ndR.getHeadConcat());

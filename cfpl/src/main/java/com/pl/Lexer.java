@@ -1,5 +1,7 @@
 package com.pl;
 
+import com.pl.Nodes.StringNode;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,13 +11,14 @@ import static com.pl.TokenType.*;
 import static java.lang.Character.*;
 
 public class Lexer {
-    private final String source;
+    private String source;
     private final List<Token> tokens = new ArrayList<Token>();
     private int ctr = 0;
     private Token currToken;
     private Position position;
     private static final Map<String, TokenType> reserved;
     public boolean hadError = false; // temp
+
     static {
         reserved = new HashMap<>();
         reserved.put("VAR", KW_VAR);
@@ -158,21 +161,86 @@ public class Lexer {
             addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end+1);
         }
     }
+    private void comment() {
+
+        nextCharacterFromSource();
+        int start = position.getIndex();
+        while(!(getCurrentCharacter() == '\n'))
+        {
+            nextCharacterFromSource();
+        }
+        int end = position.getIndex();
+
+        addToken(COMMENT, source.substring(start-1, end), start-1, end);
+        /*else{
+            return;
+        }*/
+    }//end of comment
 
     private void string() {
         int start = position.getIndex();
+        String tempStr = "";
+        char tempTest;
+
         while (peek() != '\"' && peekNext() != '\n' && !isAtEnd()) {
+
+            if(getCurrentCharacter() == '\n') {
+                System.out.println("ERROR: Missing Double Quotes");
+                hadError = true;
+            }else if( getCurrentCharacter() == '#'){
+                setCurrCharacter('\n');
+            }else if(getCurrentCharacter() == '['){
+               /** if(text.charAt(pos+2) == ']'){
+                advance();
+                temp = currentChar;
+                advance();
+                currentChar = temp;
+                }
+                else{
+                System.out.println("Expecting ']' after special character at line "+line);
+                hadError = true;
+                }*/
+                if(source.charAt(position.getIndex() + 2) == ']'){
+                    char temp;
+                    nextCharacterFromSource();
+                    temp = getCurrentCharacter();
+                    //setCurrCharacter('');
+                    this.source.replace("[", "");
+                    this.source.replace("]", "");
+                    setCurrCharacter(temp);
+                    nextCharacterFromSource();
+                    setCurrCharacter(temp);
+
+                    System.out.println("temp: "+temp);
+                }else{
+                    System.out.println("Expecting ']' after special character at line ");
+                    hadError = true;
+                }
+
+            }
+            System.out.println("curr Char: "+getCurrentCharacter());
+            tempStr += getCurrentCharacter();
             nextCharacterFromSource();
         }
+
         nextCharacterFromSource();
+        /**if(getPrevCharacter() == '\"'){
+            System.out.println(tempStr);
+        }else if(getCurrentCharacter() == '\n') {
+            System.out.println("ERROR: Missing Double Quotes");
+            hadError = true;
+        }*/
         int end = position.getIndex();
-        String s = source.substring(start-1, end);
+        String s = tempStr;
+        System.out.println("S: "+s);
         TokenType t = reserved.get(s);
+
         if (t == null){
             t = STRING;
         }
 
         addToken(t, s, start, end-1);
+        System.out.println(new StringNode(currToken));
     }
 
     private boolean isAlphaNumeric(char c) {
@@ -254,8 +322,20 @@ public class Lexer {
         return currentCharacter;
     }
     private char getCurrentCharacter(){
+
         return source.charAt(position.getIndex());
     }
+
+    private void setCurrCharacter(char x){
+        char[] arr = this.source.toCharArray();
+
+        arr[position.getIndex()] = x;
+        this.source = new String(arr);
+
+    }
+
+
+
     private char getPrevCharacter() {return source.charAt(position.getIndex()-1);}
     private boolean isAtEnd() {
         return position.getIndex() >= source.length();
@@ -266,20 +346,5 @@ public class Lexer {
     //start =
     //addToken(COMMENT, null, start, end)
 
-    private void comment() {
 
-        nextCharacterFromSource();
-        int start = position.getIndex();
-        while(!(getCurrentCharacter() == '\n'))
-        {
-           nextCharacterFromSource();
-        }
-        int end = position.getIndex();
-
-        addToken(COMMENT, source.substring(start-1, end), start-1, end);
-
-        /*else{
-            return;
-        }*/
-    }//end of comment
 }

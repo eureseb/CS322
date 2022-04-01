@@ -10,6 +10,5 @@ START
     *きつい.
     *何時.
     a = 10
-    INPUT: b
-    OUTPUT: 1 & a & 10 & "hello world"
+    OUTPUT: "[#]"
 STOP
