@@ -10,5 +10,5 @@ START
     *きつい.
     *何時.
     a = 10
-    OUTPUT: "[#]"
+    OUTPUT: "[*] [&] # a" & "b"
 STOP

@@ -197,7 +197,7 @@ public class Lexer {
                     nextCharacterFromSource();
                     setCurrCharacter(temp);
                 }else{
-                    System.out.println("Expecting ']' after special character at line ");
+                    System.out.println("ERROR: Missing ]");
                     hadError = true;
                 }
 
