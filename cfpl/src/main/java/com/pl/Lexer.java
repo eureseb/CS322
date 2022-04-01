@@ -190,56 +190,32 @@ public class Lexer {
             }else if( getCurrentCharacter() == '#'){
                 setCurrCharacter('\n');
             }else if(getCurrentCharacter() == '['){
-               /** if(text.charAt(pos+2) == ']'){
-                advance();
-                temp = currentChar;
-                advance();
-                currentChar = temp;
-                }
-                else{
-                System.out.println("Expecting ']' after special character at line "+line);
-                hadError = true;
-                }*/
                 if(source.charAt(position.getIndex() + 2) == ']'){
                     char temp;
                     nextCharacterFromSource();
                     temp = getCurrentCharacter();
-                    //setCurrCharacter('');
-                    this.source.replace("[", "");
-                    this.source.replace("]", "");
-                    setCurrCharacter(temp);
                     nextCharacterFromSource();
                     setCurrCharacter(temp);
-
-                    System.out.println("temp: "+temp);
                 }else{
                     System.out.println("Expecting ']' after special character at line ");
                     hadError = true;
                 }
 
             }
-            System.out.println("curr Char: "+getCurrentCharacter());
             tempStr += getCurrentCharacter();
             nextCharacterFromSource();
         }
 
         nextCharacterFromSource();
-        /**if(getPrevCharacter() == '\"'){
-            System.out.println(tempStr);
-        }else if(getCurrentCharacter() == '\n') {
-            System.out.println("ERROR: Missing Double Quotes");
-            hadError = true;
-        }*/
         int end = position.getIndex();
         String s = tempStr;
-        System.out.println("S: "+s);
         TokenType t = reserved.get(s);
 
         if (t == null){
             t = STRING;
         }
 
-        addToken(t, s, start, end-1);
+        addToken(t, s, s);
         System.out.println(new StringNode(currToken));
     }
 
@@ -266,6 +242,10 @@ public class Lexer {
         ctr++;
     }
 
+    private void addToken(TokenType type, String text, String literal){
+        currToken = new Token(type, text, literal, position.getLine());
+        tokens.add(currToken);
+    }
     private void addToken(TokenType type, Object literal , int startPos, int endPos) {
         String text = source.substring(startPos, endPos);
         currToken = new Token(type, text, literal, position.getLine());
