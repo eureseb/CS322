@@ -1,5 +1,5 @@
 VAR a AS INT
 START
 a = 10
-OUTPUT: (1+((2+2))) & a & 10 & "hello world"
+OUTPUT: (1+((22))) & a & 10 & "hello world"
 STOP

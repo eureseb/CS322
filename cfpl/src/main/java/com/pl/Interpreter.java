@@ -13,13 +13,10 @@ public class Interpreter {
     
     private final Map<String, Object> values = new HashMap<>();
     private final Map<String, TokenType> types = new HashMap<>();
-    String output;
     public static boolean hadError = false;
 
     public Interpreter(){}
     public Object visit(Node node){
-//        System.out.println(node.getClass().toString());
-
         if(node == null){
         }
         else if(classNameOf(node).equals("class com.pl.Nodes.ProgramNode")){
@@ -164,23 +161,18 @@ public class Interpreter {
     }
     
     public Object visitUnaryNode(UnaryNode unaryNode){
-        UnaryNode ndR = unaryNode;
-        Object num = visit(ndR.getNum());
-        Object unary = null;
-        if(ndR.getOperator().getType() == MINUS){
-            //unary = Integer.parseInt("-"+num.toString());
-            unary = -(int)num;
+        Object num = visit(unaryNode.getNum());
+        if (unaryNode.getOperator().getType() == MINUS) {
+            return -(int)num;
         }
-        else if(ndR.getOperator().getType() == PLUS){
-            unary = (int)num;
+        else {
+            return num;
         }
-
-        return unary;
     }
 
     public Object visitBinaryNode(BinaryNode binNode){
         BinaryNode ndR = binNode;
-
+        System.out.println(binNode);
         Object left = visit(ndR.getLeft());
         Object right = visit(ndR.getRight());
         Object output = null;
@@ -192,7 +184,6 @@ public class Interpreter {
             output = Float.parseFloat(left.toString()) - Float.parseFloat(right.toString());
         }
         else if(ndR.getOperator().getType() == MULTIPLY){
-            System.out.println("hello");
             output = Float.parseFloat(left.toString()) * Float.parseFloat(right.toString());
         }
         else if(ndR.getOperator().getType() == DIVIDE){
@@ -210,7 +201,6 @@ public class Interpreter {
     }
 
     public Object visitNumberNode(NumberNode numNode){
-        //NumberNode ndR = ((NumberNode) numNode);
         TokenType nodeType = numNode.getNum().getType();
         String nodeLexeme = numNode.getNum().getLexeme();
 

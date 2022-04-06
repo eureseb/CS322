@@ -15,7 +15,7 @@ public class Lexer {
     private Token currToken;
     private Position position;
     private static final Map<String, TokenType> reserved;
-    public boolean hadError = false; // temp
+    public boolean hadError = false;
     static {
         reserved = new HashMap<>();
         reserved.put("VAR", KW_VAR);
@@ -220,16 +220,14 @@ public class Lexer {
             nextCharacterFromSource();
         }
 
-        // Unterminated string.
         if (isAtEnd() || getCurrentCharacter() != '\'') {
             error(position.getLine(), "Unterminated character.");
             return;
         }
 
-        // The closing '\''
         nextCharacterFromSource();
         int end = position.getIndex();
-        // Trim the surrounding quotes.
+
         String value = source.substring(start + 1, end);
         addToken(KW_CHAR, value, start+1, end);
     }
@@ -260,11 +258,6 @@ public class Lexer {
     private boolean isAtEnd() {
         return position.getIndex() >= source.length();
     }
-    //if last.char == null || last.char == '\n'
-    //source.charAt(position.getIndex()-1).equals('\n')
-
-    //start =
-    //addToken(COMMENT, null, start, end)
 
     private void comment() {
 
@@ -277,9 +270,5 @@ public class Lexer {
         int end = position.getIndex();
 
         addToken(COMMENT, source.substring(start-1, end), start-1, end);
-
-        /*else{
-            return;
-        }*/
-    }//end of comment
+    }
 }

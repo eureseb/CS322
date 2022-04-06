@@ -79,7 +79,6 @@ public class Parser {
     Node expression(){
         Node left = this.term(), right;
         Token operator;
-
         while(currToken.isPlusOrMinus()){
             operator = currToken;
             advance();
