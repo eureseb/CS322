@@ -192,6 +192,7 @@ public class Interpreter {
             output = Float.parseFloat(left.toString()) - Float.parseFloat(right.toString());
         }
         else if(ndR.getOperator().getType() == MULTIPLY){
+            System.out.println("hello");
             output = Float.parseFloat(left.toString()) * Float.parseFloat(right.toString());
         }
         else if(ndR.getOperator().getType() == DIVIDE){

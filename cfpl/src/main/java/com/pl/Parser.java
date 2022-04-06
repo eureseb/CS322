@@ -34,10 +34,10 @@ public class Parser {
         return ast;
     }
 
-    Node factor(){                             //for constants
+    Node factor(){
         temp = currToken;
         Node nodeExpr;
-        if(currToken.isPlusOrMinus()){            //for UNARY
+        if(currToken.isPlusOrMinus()){
             advance();
             if(currToken.isIntOrFloat()){
                 return new UnaryNode(temp, factor());
@@ -96,11 +96,10 @@ public class Parser {
         return curr;
     }
 
+
     Statement declareStmt(){
         Token iden, operator;
-        Token toPrint = null;
         Token temp = currToken;
-//        String concatStr = "";
         String errMsg = "";
         Node nodeExpr;
 
@@ -129,16 +128,13 @@ public class Parser {
                 OutputStatement outputStatement = new OutputStatement(temp);
                 Node currNode;
                 if(currToken.getType().equals(COLON)){
-                    //operator = currToken;                 //COLON symbol would not be included in the AST
                     advance();
-                    //should allow: expressions (literal, unary, binary) , string, concatenated string
 
                     if(currToken.getType().equals(STRING) ){
                         outputStatement.setHeadConcat(new StringNode(currToken));
                         advance();
                     }
-                    else{                                                       //if not string, call expression to check and leave there to error
-
+                    else{
                         nodeExpr = expression();
                         outputStatement.setHeadConcat(nodeExpr);
                     }
@@ -156,18 +152,20 @@ public class Parser {
                     }
                     return outputStatement;
                 }
-                
+
                 else{
                     throw new IllegalStatementException("Missing ':' after OUTPUT keyword");
-                    
+
                 }
             }
-            else if(currToken.getType().equals(KW_INPUT)){           //for input
+            else if(currToken.getType().equals(KW_INPUT)){
+
                 advance();
+
                 if(currToken.getType().equals(COLON)){
                     advance();
-    
-                    if(currToken.getType().equals(IDENTIFIER) ){          // if string
+
+                    if(currToken.getType().equals(IDENTIFIER) ){
                         iden = currToken;
                         advance();
                         return new InputStatement(temp, iden);
@@ -181,10 +179,9 @@ public class Parser {
                 }
             }
             else if(currToken.getType().equals(COMMENT)) {
-    
+
             }
             else{
-                //BRUTE FORCE !!!!
                 if(currToken.getType().equals(NEWLINE)){
                     advance();
                 }
@@ -195,7 +192,6 @@ public class Parser {
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
-
         return null;
     }
 
@@ -226,11 +222,11 @@ public class Parser {
         if(isValidVarDeclaration()){
             var = currToken;
             identifier = advance();
-            advance(); // assuming AS
+            advance();
             TokenType currentDataType = advance().getType();
             if(isDataType(currentDataType)){
                 datatype = currToken;
-                advance(); // currToken = dataType -> '\n'
+                advance();
                 return new VariableDeclarationNode(var, identifier, datatype);
             }
             else{
@@ -239,8 +235,8 @@ public class Parser {
             }
         }
         else{
-            Token iden = tokens.get(ctr+1);// provided iden
-            Token dt = tokens.get(ctr+4); // provided data type
+            Token iden = tokens.get(ctr+1);
+            Token dt = tokens.get(ctr+4);
 
             System.out.println("it returns null1");
             System.out.println("Invalid variable declaration syntax: Got "+ iden.getLexeme() + " as identifier," + "Got " + dt.getType() + " as data type");
@@ -251,14 +247,11 @@ public class Parser {
 
 
     Node declareMultVars(){
-
         VariableDeclarationNode head = declareVar();
         VariableDeclarationNode curr= head;
-        // assuming currently \n;
         while(currToken.getType().equals(NEWLINE)){
             advance();
         }
-        // assuming currently VAR or START;
         while (currToken.getType().equals(KW_VAR)){
                 curr.setNext(declareVar());
                 curr = curr.getNext();
@@ -304,8 +297,9 @@ public class Parser {
             advance();
         }
 
-        if(currToken.getType().equals(KW_START)){ //Continue with START keyword
-             start = currToken; // KW_START
+        if(currToken.getType().equals(KW_START)){
+            start = currToken;
+
             try{
                 if(peekNextTokenType().equals(EOF)){
                     errMsg = "No STOP found";
@@ -332,40 +326,44 @@ public class Parser {
                 goToEof();
 
             }
-             // currTokenType = STOP
-             //add error handling here that does not allow anything after start
-            if(!(currToken.isEofOrStop())){
+
+            if (!(currToken.isEofOrStop())) {
                 head_statement = declareMultStmts();
             }
 
-            if(currToken.getType().equals(KW_STOP)){
+            if (currToken.getType().equals(KW_STOP)) {
                 stop = currToken;
+                advance();
             }
             else{
-
-                if(hadError != true){
-
-                    System.out.println("it returns null3");
-                    errToken.getLexeme();
+                if(!hadError){
+                    errMsg = "Enexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
                 }
-                hadError = true;
 
             }
          }
          else {
-            if(hadError != true){
-                errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
-
-                System.out.println("it returns null4");
-                System.out.println(errToken.getLexeme());
-                System.out.println("No START found");
+            if(!hadError){
+                errMsg = "Syntax Error: No START found";
+                hadError = true;
             }
-             hadError=true;
          }
 
-         if(hadError){
+         while(currToken.getType() == NEWLINE){
+             advance();
+         }
+
+         if(!hadError && currToken.getType() != EOF){
+             errMsg = "Found " + currToken.getType() + " token after STOP. Check syntax";
+             hadError = true;
+         }
+
+         if (hadError) {
+             errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
+             System.out.println(errMsg);
              return null;
-         }else{
+         }
+         else {
              System.out.println("\n== Program Complete. No Errors ==\n");
              return new ProgramNode(head_var, start, head_statement, stop);
          }
