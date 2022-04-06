@@ -66,7 +66,9 @@ public class Parser {
         Node left = this.factor(), right;
         Token operator;
 
+        System.out.println(currToken);
         while(currToken.isMulOrDiv()){
+
             operator = currToken;
             advance();
             right = factor();

@@ -1,5 +1,4 @@
-VAR a AS INT
 START
-a = 10
-OUTPUT: (1+((22))) & a & 10 & "hello world"
+OUTPUT: ((2)*(2)*(2)*(3+(2)))
 STOP
+VAR a AS INT

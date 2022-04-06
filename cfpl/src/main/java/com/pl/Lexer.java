@@ -75,8 +75,6 @@ public class Lexer {
                 if(currToken.getType().equals(NEWLINE)){
                     comment();
                     break;
-                }else if(getPrevCharacter() == '*'){
-                    comment();
                 }else
                     addToken(MULTIPLY);
                 break;
