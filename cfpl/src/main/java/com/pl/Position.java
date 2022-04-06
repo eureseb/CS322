@@ -4,7 +4,7 @@ class Position {
     private int index;
     private int line;
     private int col;
-    private int fileLength;
+    private final int fileLength;
     public Position(int idx, int lin, int col, int len){
         this.index = idx;
         this.line = lin;
@@ -41,9 +41,5 @@ class Position {
                 ", col=" + col +
                 ", fileLength=" + fileLength +
                 '}';
-    }
-
-    public Position getPosition(){
-        return new Position(index, line, col, fileLength);
     }
 }

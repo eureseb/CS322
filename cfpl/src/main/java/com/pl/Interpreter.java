@@ -18,6 +18,7 @@ public class Interpreter {
     public Interpreter(){}
     public Object visit(Node node){
         if(node == null){
+            return null;
         }
         else if(classNameOf(node).equals("class com.pl.Nodes.ProgramNode")){
             visitProgramNode((ProgramNode)node);
@@ -64,46 +65,39 @@ public class Interpreter {
     }
 
     public void visitProgramNode(ProgramNode progNode){
-        ProgramNode ndR = progNode;
-        visit(ndR.getVarDeclarations());
-        visit(ndR.getStmtDeclaration());
+        visit(progNode.getVarDeclarations());
+        visit(progNode.getStmtDeclaration());
     }
 
     public void visitVarDeclareNode(VariableDeclarationNode varDecNode){
-        VariableDeclarationNode node = varDecNode;
-        String nodeTokenLexeme = node.getIdentifier().getLexeme();
+        String nodeTokenLexeme = varDecNode.getIdentifier().getLexeme();
         values.put(nodeTokenLexeme, null);
-        types.put(nodeTokenLexeme, node.dataType().getType());
-        if(node.getNext() != null){
-            visit(node.getNext());
+        types.put(nodeTokenLexeme, varDecNode.dataType().getType());
+        if(varDecNode.getNext() != null){
+            visit(varDecNode.getNext());
         }
     }
 
     public void visitAssignStmt(AssignStatement assignStmt){
-        AssignStatement ndR = assignStmt;
-        // TODO!!!! check if it is a valid value considering the datatype
+        Object expr = visit(assignStmt.getRight());
 
-        Object expr = visit(ndR.getRight());
-
-        if(values.containsKey(ndR.getIdentifier().getLexeme())){
-            values.put(ndR.getIdentifier().getLexeme(), expr);
+        if(values.containsKey(assignStmt.getIdentifier().getLexeme())){
+            values.put(assignStmt.getIdentifier().getLexeme(), expr);
         }
         else{
-            System.out.println("Identifier '"+ndR.getIdentifier().getLexeme() + "' does not exist.");
+            System.out.println("Identifier '"+assignStmt.getIdentifier().getLexeme() + "' does not exist.");
             hadError = true;
         }
 
-        if(ndR.getNext() != null){
-            visit(ndR.getNext());
+        if(assignStmt.getNext() != null){
+            visit(assignStmt.getNext());
         }
     }
 
     public void visitOutputStmt(OutputStatement outNode){
-        OutputStatement ndR = outNode;
-        Object outputobj = visit(ndR.getHeadConcat());
-        System.out.println(outputobj);
-        Node currStrNode = ndR.getHeadConcat();
-
+        Object outputStmt = visit(outNode.getHeadConcat());
+        System.out.println(outputStmt);
+        Node currStrNode = outNode.getHeadConcat();
         while(currStrNode.next != null){
             System.out.println(visit(currStrNode.next));
             currStrNode = currStrNode.next;
@@ -111,31 +105,27 @@ public class Interpreter {
     }
 
     public void visitInputStmt(InputStatement node){
-        InputStatement ndR = ((InputStatement) node);
         Scanner sc = new Scanner(System.in);
-        String ndrLexeme = ndR.getIden().getLexeme();
-        Token ndrIden = ndR.getIden(); 
-        Object inp;
+        String ndrLexeme = node.getIden().getLexeme();
+        Token ndrIden = node.getIden();
+        String inp;
         String errMsg = "";
         if(values.containsKey(ndrLexeme)){
             System.out.print("Enter value for "+ndrIden.getLexeme()+": ");
             inp = sc.nextLine();
             try{
                 if(types.get(ndrLexeme) == KW_INT){
-                        inp = Integer.parseInt(inp.toString());
-                        values.put(ndrLexeme, inp);
+                        values.put(ndrLexeme, Integer.parseInt(inp));
                 }
                 else if(types.get(ndrLexeme) == KW_FLOAT){
-                        inp = Float.parseFloat(inp.toString());
-                        values.put(ndrLexeme, inp);
+                        values.put(ndrLexeme, Float.parseFloat(inp));
                     }
                 else if(types.get(ndrLexeme) == KW_CHAR){
-                        inp = inp.toString().charAt(0);
-                        values.put(ndrLexeme, inp);
+                        values.put(ndrLexeme, inp.charAt(0));
                     }
                 else if(types.get(ndrLexeme) == KW_BOOLEAN){
-                    if(((String) inp).equalsIgnoreCase(("true")) || ((String) inp).equalsIgnoreCase("false")){
-                        values.put(ndrLexeme, Boolean.parseBoolean(inp.toString()));
+                    if(inp.equalsIgnoreCase("true") || inp.equalsIgnoreCase("false")){
+                        values.put(ndrLexeme, Boolean.parseBoolean(inp));
                     }
                     else{
                         throw new IllegalStatementException();
@@ -155,8 +145,8 @@ public class Interpreter {
             System.out.println(errMsg);
         }
 
-        if(ndR.getNext() != null){
-            visit(ndR.getNext());
+        if(node.getNext() != null){
+            visit(node.getNext());
         }
     }
     
@@ -171,26 +161,24 @@ public class Interpreter {
     }
 
     public Object visitBinaryNode(BinaryNode binNode){
-        BinaryNode ndR = binNode;
-        System.out.println(binNode);
-        Object left = visit(ndR.getLeft());
-        Object right = visit(ndR.getRight());
+        Object left = visit(binNode.getLeft());
+        Object right = visit(binNode.getRight());
         Object output = null;
 
-        if(ndR.getOperator().getType() == PLUS){
+        if(binNode.getOperator().getType() == PLUS){
             output = Float.parseFloat(left.toString()) + Float.parseFloat(right.toString());
         }
-        else if(ndR.getOperator().getType() == MINUS){
+        else if(binNode.getOperator().getType() == MINUS){
             output = Float.parseFloat(left.toString()) - Float.parseFloat(right.toString());
         }
-        else if(ndR.getOperator().getType() == MULTIPLY){
+        else if(binNode.getOperator().getType() == MULTIPLY){
             output = Float.parseFloat(left.toString()) * Float.parseFloat(right.toString());
         }
-        else if(ndR.getOperator().getType() == DIVIDE){
+        else if(binNode.getOperator().getType() == DIVIDE){
             output = Float.parseFloat(left.toString()) / Float.parseFloat(right.toString());
         }
         else{
-
+            System.out.println("Syntax Error: Expected an operator but got " + binNode.getOperator());
         }
 
         if(left instanceof Integer && right instanceof Integer){

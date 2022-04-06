@@ -10,10 +10,10 @@ import static java.lang.Character.*;
 
 public class Lexer {
     private final String source;
-    private final List<Token> tokens = new ArrayList<Token>();
+    private final List<Token> tokens = new ArrayList<>();
     private int ctr = 0;
     private Token currToken;
-    private Position position;
+    private final Position position;
     private static final Map<String, TokenType> reserved;
     public boolean hadError = false;
     static {
@@ -135,13 +135,13 @@ public class Lexer {
     }
 
     private void integerOrFloat() {
-        TokenType tType = INT;
+        TokenType tokenType = INT;
         int start = position.getIndex();
         while (isDigit(peek())) {
             nextCharacterFromSource();
         }
         if (peek() == '.' && isDigit(peekNext())) {
-            tType = FLOAT;
+            tokenType = FLOAT;
             nextCharacterFromSource();
         }
 
@@ -151,10 +151,10 @@ public class Lexer {
 
         int end = position.getIndex();
 
-        if (tType == INT) {
+        if (tokenType == INT) {
             addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end+1);
         }
-        else if (tType == FLOAT) {
+        else {
             addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end+1);
         }
     }
@@ -244,7 +244,7 @@ public class Lexer {
 
     private void error(int line, String message) {
         hadError = true;
-        System.out.println("[line: " + position.getLine() + "," + "col: "+ position.getCol() + "] Error" + getCurrentCharacter() + ": " + message);
+        System.out.println("[line: " + line + "," + "col: "+ position.getCol() + "] Error" + getCurrentCharacter() + ": " + message);
     }
     private char nextCharacterFromSource() {
         char currentCharacter = getCurrentCharacter();

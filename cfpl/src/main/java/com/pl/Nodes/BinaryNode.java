@@ -3,9 +3,9 @@ package com.pl.Nodes;
 import com.pl.Token;
 
 public class BinaryNode extends Node {
-    private Node left;
-    private Token operator;
-    private Node right;
+    private final Node left;
+    private final Token operator;
+    private final Node right;
 
     public BinaryNode(Node left, Token operator, Node right) {
         this.left = left;

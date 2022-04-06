@@ -30,8 +30,7 @@ public class Parser {
     }
 
     Node parse(){
-        ProgramNode ast = program();
-        return ast;
+        return program();
     }
 
     Node factor(){
@@ -88,7 +87,7 @@ public class Parser {
         return left;
     }
 
-    public Node concatenator(Node curr, Node nextNode){
+    public Node concatNode(Node curr, Node nextNode){
         curr.next = nextNode;
         curr = nextNode;
 
@@ -97,9 +96,8 @@ public class Parser {
 
 
     Statement declareStmt(){
-        Token iden, operator;
+        Token identifier, operator;
         Token temp = currToken;
-        String errMsg = "";
         Node nodeExpr;
 
         try{
@@ -142,11 +140,11 @@ public class Parser {
                     while (currToken.getType().equals(AND)){
                         advance();
                         if(currToken.getType().equals(STRING)){
-                            currNode = concatenator(currNode, new StringNode(currToken));
+                            currNode = concatNode(currNode, new StringNode(currToken));
                             advance();
                         }
                         else{
-                            currNode = concatenator(currNode, expression());
+                            currNode = concatNode(currNode, expression());
                         }
                     }
                     return outputStatement;
@@ -165,9 +163,9 @@ public class Parser {
                     advance();
 
                     if(currToken.getType().equals(IDENTIFIER) ){
-                        iden = currToken;
+                        identifier = currToken;
                         advance();
-                        return new InputStatement(temp, iden);
+                        return new InputStatement(temp, identifier);
                     }
                     else{
                         throw new IllegalStatementException("Expecting identifier at line "+currToken.getLine());
@@ -216,7 +214,7 @@ public class Parser {
     }
 
     VariableDeclarationNode declareVar(){
-        Token var, datatype, identifier;
+        Token var, dataType, identifier;
 
         if(isValidVarDeclaration()){
             var = currToken;
@@ -224,9 +222,9 @@ public class Parser {
             advance();
             TokenType currentDataType = advance().getType();
             if(isDataType(currentDataType)){
-                datatype = currToken;
+                dataType = currToken;
                 advance();
-                return new VariableDeclarationNode(var, identifier, datatype);
+                return new VariableDeclarationNode(var, identifier, dataType);
             }
             else{
                 System.out.println("Invalid data type: incorrect data type");
@@ -234,11 +232,10 @@ public class Parser {
             }
         }
         else{
-            Token iden = tokens.get(ctr+1);
-            Token dt = tokens.get(ctr+4);
+            identifier = tokens.get(ctr+1);
+            dataType = tokens.get(ctr+4);
 
-            System.out.println("it returns null1");
-            System.out.println("Invalid variable declaration syntax: Got "+ iden.getLexeme() + " as identifier," + "Got " + dt.getType() + " as data type");
+            System.out.println("Invalid variable declaration syntax: Got "+ identifier.getLexeme() + " as identifier," + "Got " + dataType.getType() + " as data type");
             hadError = true;
         }
         return null;
@@ -373,9 +370,6 @@ public class Parser {
         boolean secondIsIden = tokens.get(this.ctr+1).getType().equals(IDENTIFIER);
         boolean thirdIsAS = tokens.get(this.ctr+2).getType().equals(KW_AS);
         return firstIsVar && secondIsIden && thirdIsAS;
-    }
-    public List<Token> getTokens(){
-        return this.tokens;
     }
 
 }

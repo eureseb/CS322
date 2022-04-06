@@ -95,21 +95,14 @@ public enum TokenType {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public static boolean isIdentifier(String token){
         return token == "IDEN";
     }
 
     public static boolean isDataType(TokenType tokenType){
-        if(tokenType == KW_INT ||
-           tokenType == KW_FLOAT ||
-           tokenType == KW_BOOLEAN ||
-           tokenType == KW_CHAR){
-               return true;
-           }
-        return false; 
+        return tokenType == KW_INT ||
+                tokenType == KW_FLOAT ||
+                tokenType == KW_BOOLEAN ||
+                tokenType == KW_CHAR;
     }
 }
