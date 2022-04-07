@@ -1,4 +1,5 @@
 VAR dsad=1.2,d AS FLOAT
 START
-OUTPUT: dsad & "&" & d
+d = 100.1
+OUTPUT: (dsad + d)
 STOP

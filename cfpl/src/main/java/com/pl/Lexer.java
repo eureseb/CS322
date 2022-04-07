@@ -9,7 +9,7 @@ import static com.pl.TokenType.*;
 import static java.lang.Character.*;
 
 public class Lexer {
-    private final String source;
+    private String source;
     private final List<Token> tokens = new ArrayList<>();
     private int ctr = 0;
     private Token currToken;
@@ -158,19 +158,51 @@ public class Lexer {
     }
 
     private void string() {
-        int start = position.getIndex();
+        StringBuilder tempStr = new StringBuilder();
+
         while (peek() != '\"' && peekNext() != '\n' && !isAtEnd()) {
+
+            if(getCurrentCharacter() == '\n') {
+                System.out.println("ERROR: Missing Double Quotes");
+                hadError = true;
+            }else if( getCurrentCharacter() == '#'){
+                setCurrCharacter('\n');
+            }else if(getCurrentCharacter() == '['){
+                if(source.charAt(position.getIndex() + 2) == ']'){
+                    char temp;
+                    nextCharacterFromSource();
+                    temp = getCurrentCharacter();
+                    nextCharacterFromSource();
+                    setCurrCharacter(temp);
+                }else{
+                    System.out.println("ERROR: Missing ]");
+                    hadError = true;
+                }
+
+            } else if(isAReservedChar(getCurrentCharacter())){
+                hadError = true;
+            }
+            tempStr.append(getCurrentCharacter());
             nextCharacterFromSource();
         }
+
         nextCharacterFromSource();
-        int end = position.getIndex();
-        String s = source.substring(start-1, end);
+        String s = tempStr.toString();
         TokenType t = reserved.get(s);
+
         if (t == null){
             t = STRING;
         }
 
-        addToken(t, s, start, end-1);
+        addToken(t, s, s);
+    }
+
+    private void setCurrCharacter(char x){
+        char[] arr = this.source.toCharArray();
+
+        arr[position.getIndex()] = x;
+        this.source = new String(arr);
+
     }
 
     private boolean isAlphaNumeric(char c) {
@@ -194,6 +226,11 @@ public class Lexer {
     private void addToken(TokenType type) {
         addToken(type, null, position.getIndex()-1, position.getIndex());
         ctr++;
+    }
+
+    private void addToken(TokenType type, String text, String literal){
+        currToken = new Token(type, text, literal, position.getLine());
+        tokens.add(currToken);
     }
 
     private void addToken(TokenType type, Object literal , int startPos, int endPos) {
@@ -251,6 +288,9 @@ public class Lexer {
     }
     private char getCurrentCharacter(){
         return source.charAt(position.getIndex());
+    }
+    private boolean isAReservedChar(char c){
+        return c == '&' || c == '"';
     }
     private char getPrevCharacter() {return source.charAt(position.getIndex()-1);}
     private boolean isAtEnd() {

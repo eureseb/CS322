@@ -29,6 +29,7 @@ public class App
         Interpreter interpreter;
 //        System.out.println(tokens);
         if(lexer.hadError){
+            System.out.println("error in lexer");
             System.exit(404);
         }
 
