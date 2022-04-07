@@ -3,7 +3,10 @@ package com.pl;
 import com.pl.Nodes.*;
 import com.pl.Statements.*;
 import static com.pl.TokenType.*;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class Parser {
@@ -18,15 +21,13 @@ public class Parser {
         ctr = -1;
         advance();
     }
-   
-    private Token advance(){
+
+    private void advance(){
         this.ctr += 1;
-        if(ctr < tokens.size()){
+        if (ctr < tokens.size()) {
             this.currToken = this.tokens.get(ctr);
-            return this.currToken;
-        }else System.out.println("Can't advance further");
-        
-        return null;
+        }
+        else System.out.println("Can't advance further");
     }
 
     Node parse(){
@@ -39,7 +40,7 @@ public class Parser {
         if(currToken.isPlusOrMinus()){
             advance();
             if(currToken.isIntOrFloat()){
-                return new UnaryNode(temp, factor());
+                return new UnaryNode(temp, (NumberNode) factor());
             }
         }
         else if(currToken.isIntOrFloat()){
@@ -66,7 +67,6 @@ public class Parser {
         Node left = this.factor(), right;
         Token operator;
 
-        System.out.println(currToken);
         while(currToken.isMulOrDiv()){
 
             operator = currToken;
@@ -90,9 +90,8 @@ public class Parser {
     }
 
     public Node concatNode(Node curr, Node nextNode){
-        curr.next = nextNode;
+        curr.setNext(nextNode);
         curr = nextNode;
-
         return curr;
     }
 
@@ -215,30 +214,221 @@ public class Parser {
         return stmtHead;
     }
 
+    private boolean itHasAnotherVariableBeside(){
+        return currToken.getType() == COMMA && peekNextTokenType().equals(IDENTIFIER);
+    }
     VariableDeclarationNode declareVar(){
-        Token var, dataType, identifier;
 
-        if(isValidVarDeclaration()){
-            var = currToken;
-            identifier = advance();
+        VariableDeclarationNode topVarDeclr=null;
+        VariableDeclarationNode currVarDeclr=null;
+        VariableDeclarationNode node;
+        Token identifier;
+        Node factor;
+
+
+        if(currToken.getType().equals(KW_VAR)) {
             advance();
-            TokenType currentDataType = advance().getType();
-            if(isDataType(currentDataType)){
-                dataType = currToken;
-                advance();
-                return new VariableDeclarationNode(var, identifier, dataType);
-            }
-            else{
-                System.out.println("Invalid data type: incorrect data type");
-                hadError = true;
-            }
-        }
-        else{
-            identifier = tokens.get(ctr+1);
-            dataType = tokens.get(ctr+4);
+            Map<Token, Object> variables = new HashMap<>();
 
-            System.out.println("Invalid variable declaration syntax: Got "+ identifier.getLexeme() + " as identifier," + "Got " + dataType.getType() + " as data type");
-            hadError = true;
+            while (currToken.getType() == IDENTIFIER) {
+                Object value = null;
+
+                identifier = currToken;
+
+                advance();
+                switch (currToken.getType()) {
+                    case COMMA:
+
+                        variables.put(identifier, null);
+
+                        advance();
+                        break;
+
+                    case EQUALS:
+                        advance();
+                        if (currToken.hasLiteral()) {
+
+                            variables.put(identifier, currToken.getLiteral());
+                            advance();
+
+                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside())) {
+                                System.out.println("Syntax error at token " + currToken.getType() + " at line " + currToken.getLine());
+                                hadError = true;
+                                return null;
+                            }
+
+                            advance();
+
+                        } else if (currToken.getType().equals(STRING)) {
+                            variables.put(identifier, currToken.getLiteral());
+                            advance();
+
+                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside() )) {
+                                System.out.println("Syntax error at token " + currToken.getType() + " at line " + currToken.getLine());
+                                hadError = true;
+                                return null;
+                            }
+                            advance();
+                        } else {
+
+                            factor = factor();
+
+                            if (factor instanceof UnaryNode) {
+                                UnaryNode currNode = (UnaryNode)factor;
+                                NumberNode currNumNode = currNode.getNum();
+                                TokenType numNodeType = currNumNode.getNum().getType();
+
+                                value = (currNode.getOperator().getLexeme() + currNumNode.getNum().getLexeme());
+
+                                if (numNodeType.equals(INT)) {
+                                    value = Integer.parseInt(value.toString());
+                                }
+                                else if (numNodeType.equals(FLOAT)) {
+                                    value = Float.parseFloat(value.toString());
+                                }
+                                else {
+                                    System.out.println("Invalid value declaration at line " + currToken.getLine() + " for identifier " + identifier);
+                                    hadError = true;
+                                }
+
+                            }
+                            else if (factor instanceof NumberNode) {
+                                NumberNode currNode = (NumberNode)factor;
+                                value = (currNode.getNum().getLiteral());
+                            }
+
+                            variables.put(identifier, value);
+
+                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside()) ) {
+                                System.out.println("Syntax error at token " + currToken.getType() + " at line " + currToken.getLine());
+                                hadError = true;
+                                return null;
+                            }
+                            advance();
+                        }
+                        break;
+
+                    case KW_AS:
+                        if (peekPrevTokenType().equals(IDENTIFIER)) {
+                            variables.put(identifier, null);
+                        }
+                        advance();
+                        break;
+
+                    default:
+                        System.out.println("Invalid variable declaration syntax at line " + currToken.getLine());
+                        hadError = true;
+                        return null;
+                }
+            }
+
+            if (!currToken.isDataType()) {
+                System.out.println("Invalid variable declaration syntax at line " + currToken.getLine());
+                hadError = true;
+                return null;
+            }
+
+            Token dataType = currToken;
+
+            switch (dataType.getType()) {
+                case KW_INT:
+                    for (Map.Entry<Token, Object> var : variables.entrySet()) {
+                        Object variableValue = var.getValue();
+
+                        if (variableValue == null || variableValue instanceof Integer) {
+
+                            node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
+                            if (topVarDeclr == null) {
+                                topVarDeclr = currVarDeclr = node;
+                            }
+                            else {
+                                currVarDeclr.setNext(node);
+                                currVarDeclr = currVarDeclr.getNext();
+                            }
+                        } else {
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected an INTEGER.");
+                            hadError = true;
+                        }
+                    }
+                    break;
+
+                case KW_FLOAT:      //int can be assigned as float
+                    for (Map.Entry<Token, Object> var : variables.entrySet()) {
+                        Object variableValue = var.getValue();
+
+                        if (variableValue == null || variableValue instanceof Float) {
+
+                            node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
+
+                            if (topVarDeclr == null) {
+                                topVarDeclr = currVarDeclr = node;
+                            }
+                            else {
+                                currVarDeclr.setNext(node);
+                                currVarDeclr = currVarDeclr.getNext();
+                            }
+
+                        } else if (var.getValue() instanceof Integer) {     //if value is an int, convert to float
+                            node = new VariableDeclarationNode(var.getKey(), dataType, Float.parseFloat(var.getValue().toString()));
+
+                            if (topVarDeclr == null) {
+                                topVarDeclr = currVarDeclr = node;
+                            }
+                            else {
+                                currVarDeclr.setNext(node);
+                                currVarDeclr = currVarDeclr.getNext();
+                            }
+                        } else {
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a FLOAT.");
+                            hadError = true;
+                        }
+                    }
+                    break;
+
+                case KW_BOOLEAN:
+                    for (Map.Entry<Token, Object> var : variables.entrySet()) {
+                        Object variableValue = var.getValue();
+
+                        if (var.getValue() == null || var.getValue() instanceof Boolean) {
+                            node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
+
+                            if (topVarDeclr == null) {
+                                topVarDeclr = currVarDeclr = node;
+                            }
+                            else {
+                                currVarDeclr.setNext(node);
+                                currVarDeclr = currVarDeclr.getNext();
+                            }
+                        } else {
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a BOOLEAN.");
+                            hadError = true;
+                        }
+                    }
+                    break;
+
+                case KW_CHAR:
+                    for (Map.Entry<Token, Object> var : variables.entrySet()) {
+                        Object variableValue = var.getValue();
+                        if (var.getValue() == null || var.getValue() instanceof Character) {
+
+                            node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
+
+                            if (topVarDeclr == null) {
+                                topVarDeclr = currVarDeclr = node;
+                            }
+                            else {
+                                currVarDeclr.setNext(node);
+                                currVarDeclr = currVarDeclr.getNext();
+                            }
+                        } else {
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a CHARACTER.");
+                            hadError = true;
+                        }
+                    }
+                    break;
+            }
+
+            return topVarDeclr;
         }
         return null;
     }
@@ -247,15 +437,21 @@ public class Parser {
     Node declareMultVars(){
         VariableDeclarationNode head = declareVar();
         VariableDeclarationNode curr= head;
+
+        advance();
+
         while(currToken.getType().equals(NEWLINE)){
             advance();
         }
         while (currToken.getType().equals(KW_VAR)){
                 curr.setNext(declareVar());
-                curr = curr.getNext();
+                while(curr.getNext() != null){
+                    curr = curr.getNext();
+                }
                 advance();
-            
+                advance();
         }
+
         return head;
     }
     
@@ -266,6 +462,9 @@ public class Parser {
     }
     TokenType peekNextTokenType(){
         return tokens.get(ctr+1).getType();
+    }
+    TokenType peekPrevTokenType(){
+        return tokens.get(ctr-1).getType();
     }
 
     ProgramNode program() {
@@ -365,13 +564,6 @@ public class Parser {
              System.out.println("\n== Program Complete. No Errors ==\n");
              return new ProgramNode(head_var, start, head_statement, stop);
          }
-    }
-
-    private boolean isValidVarDeclaration(){
-        boolean firstIsVar = currToken.getType().equals(KW_VAR);
-        boolean secondIsIden = tokens.get(this.ctr+1).getType().equals(IDENTIFIER);
-        boolean thirdIsAS = tokens.get(this.ctr+2).getType().equals(KW_AS);
-        return firstIsVar && secondIsIden && thirdIsAS;
     }
 
 }

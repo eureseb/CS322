@@ -1,4 +1,4 @@
+VAR dsad=1.2,d AS FLOAT
 START
-OUTPUT: ((2)*(2)*(2)*(3+(2)))
+OUTPUT: dsad & "&" & d
 STOP
-VAR a AS INT

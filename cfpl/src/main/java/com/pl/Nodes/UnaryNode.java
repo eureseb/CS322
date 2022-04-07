@@ -4,9 +4,9 @@ import com.pl.Token;
 
 public class UnaryNode extends Node {
     Token operator;
-    Node num;
+    NumberNode num;
 
-    public UnaryNode(Token operator, Node num) {
+    public UnaryNode(Token operator, NumberNode num) {
         this.operator = operator;
         this.num = num;
     }
@@ -15,7 +15,7 @@ public class UnaryNode extends Node {
         return operator;
     }
 
-    public Node getNum(){
+    public NumberNode getNum(){
         return this.num;
     }
     public String toString() {

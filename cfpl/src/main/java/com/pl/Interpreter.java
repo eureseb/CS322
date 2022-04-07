@@ -20,46 +20,40 @@ public class Interpreter {
         if(node == null){
             return null;
         }
-        else if(classNameOf(node).equals("class com.pl.Nodes.ProgramNode")){
+        else if(node instanceof ProgramNode){
             visitProgramNode((ProgramNode)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Nodes.VariableDeclarationNode")){
+        else if(node instanceof VariableDeclarationNode){
             visitVarDeclareNode((VariableDeclarationNode)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Statements.AssignStatement")){
+        else if(node instanceof AssignStatement){
             visitAssignStmt((AssignStatement)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Statements.OutputStatement")){
+        else if(node instanceof OutputStatement){
             visitOutputStmt((OutputStatement)node);
-
         }
-        else if(classNameOf(node).equals("class com.pl.Statements.InputStatement")){
+        else if(node instanceof InputStatement){
             visitInputStmt((InputStatement)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Nodes.StringNode")){
+        else if(node instanceof StringNode){
             return visitStringNode((StringNode)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Nodes.BinaryNode")){
+        else if(node instanceof BinaryNode){
             return visitBinaryNode((BinaryNode)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Nodes.UnaryNode")){
+        else if(node instanceof UnaryNode){
             return visitUnaryNode((UnaryNode)node);
         }
-        else if(classNameOf(node).equals("class com.pl.Nodes.NumberNode")){
+        else if(node instanceof NumberNode){
             return visitNumberNode((NumberNode)node);
         }
         else{
             illegalVisit(node);
         }
         return null;
+
     }
 
-    private String classNameOf(Node node){
-        if(node != null){
-            return node.getClass().toString();
-        }
-        return null;
-    }
     public void illegalVisit(Node node){
         System.out.println("You have something that I can't interpret: " + node);
     }
@@ -71,7 +65,10 @@ public class Interpreter {
 
     public void visitVarDeclareNode(VariableDeclarationNode varDecNode){
         String nodeTokenLexeme = varDecNode.getIdentifier().getLexeme();
-        values.put(nodeTokenLexeme, null);
+        if(values.containsKey(nodeTokenLexeme)){
+            System.out.println(nodeTokenLexeme + " is in conflict with other declarations. Check program");
+        }
+        values.put(nodeTokenLexeme, varDecNode.getValue());
         types.put(nodeTokenLexeme, varDecNode.dataType().getType());
         if(varDecNode.getNext() != null){
             visit(varDecNode.getNext());
@@ -98,9 +95,9 @@ public class Interpreter {
         Object outputStmt = visit(outNode.getHeadConcat());
         System.out.println(outputStmt);
         Node currStrNode = outNode.getHeadConcat();
-        while(currStrNode.next != null){
-            System.out.println(visit(currStrNode.next));
-            currStrNode = currStrNode.next;
+        while(currStrNode.getNext() != null){
+            System.out.println(visit(currStrNode.getNext()));
+            currStrNode = currStrNode.getNext();
         }
     }
 

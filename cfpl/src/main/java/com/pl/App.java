@@ -33,14 +33,17 @@ public class App
         }
 
        // System.out.println("\n===== Parsing =====\n");
-        Parser parser = new Parser(tokens);
-       // System.out.println(parser.getTokens());
+        Parser parser;
         try {
             lexer = new Lexer(source.toString());
             tokens = lexer.scanTokens();
 //             System.out.println("lexer tokens: "+ tokens);
             parser = new Parser(tokens);
             ast = parser.parse();
+//
+//            System.out.println("ast");
+//            System.out.println(ast);
+
             interpreter = new Interpreter();
 //             System.out.println("AST:" + ast +"\n");
             interpreter.visit(ast);

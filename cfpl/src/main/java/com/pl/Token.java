@@ -28,6 +28,8 @@ public class Token {
     public boolean isEofOrStop(){
         return type.equals(EOF) || type.equals(KW_STOP);
     }
+    public boolean isDataType() { return type.equals(KW_INT) || type.equals(KW_FLOAT)   ||type.equals(KW_BOOLEAN) || type.equals(KW_CHAR); }
+    public boolean hasLiteral() { return type.equals(CHAR) || type.equals(BOOL); }
     public TokenType getType() { return type; }
     public String getLexeme() { return lexeme; }
     public Object getLiteral() { return literal; }
