@@ -22,41 +22,33 @@ public class App
             }
         }
 
-        //System.out.println("\n===== Lexing =====\n");
-        Lexer lexer = new Lexer(source.toString());
-        List<Token> tokens = lexer.scanTokens();
-        Node ast;
-        Interpreter interpreter;
-//        System.out.println(tokens);
-        if(lexer.hadError){
-            System.out.println("error in lexer");
-            System.exit(404);
-        }
-
-       // System.out.println("\n===== Parsing =====\n");
-        Parser parser;
         try {
-            lexer = new Lexer(source.toString());
-            tokens = lexer.scanTokens();
-//             System.out.println("lexer tokens: "+ tokens);
-            parser = new Parser(tokens);
-            ast = parser.parse();
-//
-//            System.out.println("ast");
-//            System.out.println(ast);
+            //System.out.println("\n===== Lexing =====\n");
 
-            interpreter = new Interpreter();
-//             System.out.println("AST:" + ast +"\n");
+            Lexer lexer = new Lexer(source.toString());
+            if(lexer.hadError){
+                System.out.println("error in lexer");
+                System.exit(404);
+            }
+            List<Token> tokens = lexer.scanTokens();
+//          System.out.println("lexer tokens: "+ tokens);
+
+            // System.out.println("\n===== Parsing =====\n");
+            Parser parser = new Parser(tokens);
+            Node ast = parser.parse();
+            if(parser.hadError){
+                System.out.println("error in parser");
+                System.exit(504);
+            }
+//          System.out.println(ast);
+
+            // System.out.println("\n===== Interpreting =====\n");
+            Interpreter interpreter = new Interpreter();
             interpreter.visit(ast);
+
         }catch(Exception e){
             System.out.println(e.getMessage());
-            System.out.println("Error in parser");
+            System.out.println("Error in parser or interpreter");
         }
-
-
-
-       // System.out.println("\n===== Interpreting =====\n");
-        
-    
     }
 }
