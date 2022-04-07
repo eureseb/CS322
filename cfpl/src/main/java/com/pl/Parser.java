@@ -157,30 +157,47 @@ public class Parser {
                 }
             }
             else if(currToken.getType().equals(KW_INPUT)){
-
+                InputStatement topInputNode = null;
+                InputStatement currInputNode = null;
+                InputStatement inputStatement = null;
                 advance();
 
                 if(currToken.getType().equals(COLON)){
                     advance();
 
-                    if(currToken.getType().equals(IDENTIFIER) ){
-                        identifier = currToken;
+                    while(currToken.getType().equals(IDENTIFIER) ){
+                        inputStatement = new InputStatement(currToken);
+                        if(topInputNode == null){
+                           topInputNode = currInputNode = inputStatement;
+                        }
+                        else {
+                            currInputNode.setNext(inputStatement);
+                            currInputNode = (InputStatement) currInputNode.getNext();
+                        }
                         advance();
-                        return new InputStatement(temp, identifier);
+                        if(currToken.getType().equals(COMMA)){
+                            advance();
+                        }
+                        else if(currToken.getType().equals(NEWLINE)){
+
+                        }
+                        else {
+                            throw new IllegalStatementException("Syntax Error: Invalid INPUT syntax at line " + currToken.getLine());
+                        }
                     }
-                    else{
-                        throw new IllegalStatementException("Expecting identifier at line "+currToken.getLine());
+
+                    if(topInputNode == null){
+                        throw new IllegalStatementException("Syntax Error: Expecting identifier " + currToken.getLine() + " but got " + currToken.getType());
                     }
+
+                    return topInputNode;
                 }
                 else{
                     throw new IllegalStatementException("Missing ':' after INPUT keyword at line "+currToken.getLine());
                 }
             }
-            else if(currToken.getType().equals(COMMENT)) {
-
-            }
             else{
-                if(currToken.getType().equals(NEWLINE)){
+                if(currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)){
                     advance();
                 }
                 else{
@@ -197,9 +214,11 @@ public class Parser {
     Statement declareMultStmts(){
         Statement stmtHead = declareStmt();
         Statement curr = stmtHead;
-
         advance();
 
+        while(curr.getNext() != null){
+            curr = curr.getNext();
+        }
         while(currToken.getType().equals(NEWLINE)){
             advance();
         }
@@ -211,6 +230,7 @@ public class Parser {
             }
 
         }
+
         return stmtHead;
     }
 

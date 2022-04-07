@@ -1,5 +1,5 @@
-VAR dsad=1.2,d AS FLOAT
+VAR dsad=1,d=1 AS INT
 START
-d = 100.1
-OUTPUT: (dsad + d)
+INPUT: dsad, d
+OUTPUT: dsad & d
 STOP

@@ -79,6 +79,9 @@ public enum TokenType {
 
     ERROR("ERR"),
 
+    //EXTRA FEATURE
+    KW_FINAL("FINAL"),
+
     //Statement Type
     ST_DECLARATION("DECLARATION"),
     ST_ASSIGNMENT("ASSIGNMENT"),

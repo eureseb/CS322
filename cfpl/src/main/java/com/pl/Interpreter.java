@@ -109,7 +109,7 @@ public class Interpreter {
         String errMsg = "";
         if(values.containsKey(ndrLexeme)){
             System.out.print("Enter value for "+ndrIden.getLexeme()+": ");
-            inp = sc.nextLine();
+            inp = sc.next();
             try{
                 if(types.get(ndrLexeme) == KW_INT){
                         values.put(ndrLexeme, Integer.parseInt(inp));
