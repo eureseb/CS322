@@ -1,5 +1,8 @@
+*test
 VAR dsad=1,d=1 AS INT
+*test
 START
+*test
 INPUT: dsad, d
 OUTPUT: dsad & d
 STOP

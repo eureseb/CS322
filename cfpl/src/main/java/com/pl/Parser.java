@@ -498,21 +498,31 @@ public class Parser {
             advance();
         }
 
-        if(currToken.getType().equals(NEWLINE)) {//
+        while(currToken.getType().equals(NEWLINE)){
             advance();
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+            }
         }
+
 
         if(currToken.getType().equals(KW_VAR)){
                 head_var = declareMultVars();
         }
 
+
         if(currToken.getType().equals(COMMENT)){
             advance();
         }
 
+
         while(currToken.getType().equals(NEWLINE)){
             advance();
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+            }
         }
+
 
         if(currToken.getType().equals(KW_START)){
             start = currToken;
@@ -532,6 +542,9 @@ public class Parser {
                     advance();
                     while(currToken.getType().equals(NEWLINE)){
                         advance();
+                        if(currToken.getType().equals(COMMENT)){
+                            advance();
+                        }
                     }
                 }
                 
@@ -541,11 +554,18 @@ public class Parser {
                 System.out.println("it returns null2");
                 System.out.println(errToken.getLexeme());
                 goToEof();
-
             }
 
             if (!(currToken.isEofOrStop())) {
                 head_statement = declareMultStmts();
+            }else if(peekNextTokenType().equals(NEWLINE)){
+                advance();
+                while(currToken.getType().equals(NEWLINE)){
+                    advance();
+                    if(currToken.getType().equals(COMMENT)){
+                        advance();
+                    }
+                }
             }
 
             if (currToken.getType().equals(KW_STOP)) {
@@ -554,11 +574,12 @@ public class Parser {
             }
             else{
                 if(!hadError){
-                    errMsg = "Enexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
+                    errMsg = "Unexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
                 }
 
             }
          }
+
          else {
             if(!hadError){
                 errMsg = "Syntax Error: No START found";
@@ -580,6 +601,7 @@ public class Parser {
              System.out.println(errMsg);
              return null;
          }
+
          else {
              System.out.println("\n== Program Complete. No Errors ==\n");
              return new ProgramNode(head_var, start, head_statement, stop);
