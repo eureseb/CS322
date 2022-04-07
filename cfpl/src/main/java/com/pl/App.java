@@ -12,7 +12,7 @@ public class App
         StringBuilder source = new StringBuilder();
 
         //please change depending on environment
-        File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
+        File file = new File("C:\\Users\\Adrienne\\Desktop\\CS322\\CS322\\CFPL_TEST_GROUP3.txt");
         
         try(Scanner fileScanner = new Scanner(file)){
             while(fileScanner.hasNextLine()){
