@@ -12,6 +12,7 @@ public class ProgramNode extends Node {
         this.start = start;
         this.stmtDeclaration = statements;
         this.stop = stop;
+        
     }
 
     public ProgramNode(Object start, Node statements, Object stop) {

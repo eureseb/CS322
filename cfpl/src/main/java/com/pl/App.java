@@ -12,8 +12,8 @@ public class App
         StringBuilder source = new StringBuilder();
 
         //please change depending on environment
-        File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
-        
+        File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322\\CFPL_TEST_GROUP3.txt");
+        //File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322\\CFPL_TEST_GROUP3.txt"); BULAN FILE DIR
         try(Scanner fileScanner = new Scanner(file)){
             while(fileScanner.hasNextLine()){
                 source.append(fileScanner.nextLine()).append(fileScanner.hasNextLine() ?
