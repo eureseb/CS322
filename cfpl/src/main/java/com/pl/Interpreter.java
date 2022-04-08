@@ -29,6 +29,9 @@ public class Interpreter {
         else if(node instanceof AssignStatement){
             visitAssignStmt((AssignStatement)node);
         }
+        else if(node instanceof WhileNode){
+            visitWhileNode((WhileNode)node);
+        }
         else if(node instanceof OutputStatement){
             visitOutputStmt((OutputStatement)node);
         }
@@ -89,6 +92,10 @@ public class Interpreter {
         if(assignStmt.getNext() != null){
             visit(assignStmt.getNext());
         }
+    }
+
+    public void visitWhileNode(WhileNode wNode){
+        visit(wNode.getWhileStmtDeclaration());
     }
 
     public void visitOutputStmt(OutputStatement outNode){
