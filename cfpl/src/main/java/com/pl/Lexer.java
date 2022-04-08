@@ -71,13 +71,17 @@ public class Lexer {
                 addToken(PLUS);
                 break;
             case '*':
-                //
                 if(currToken.getType().equals(NEWLINE)){
                     comment();
                     break;
-                }else
+                }else if(getPrevCharacter() == '*'){
+                    comment();
+                    break;
+                }else {
                     addToken(MULTIPLY);
-                break;
+                    break;
+                }
+
             case '/':
                 addToken(DIVIDE);
                 break;

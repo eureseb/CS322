@@ -102,8 +102,12 @@ public class Parser {
         Token temp = currToken;
         Node nodeExpr;
 
+
         try{
-            if(currToken.getType().equals(IDENTIFIER)){
+            if(currToken.getType().equals(KW_VAR)){
+                throw new IllegalStatementException("Syntax Error: Can't declare variable after START at line " + currToken.getLine());
+            }
+            else if(currToken.getType().equals(IDENTIFIER)){
 
                 advance();
                 if(currToken.getType().equals(EQUALS)){
@@ -413,7 +417,7 @@ public class Parser {
                     for (Map.Entry<Token, Object> var : variables.entrySet()) {
                         Object variableValue = var.getValue();
 
-                        if (var.getValue() == null || var.getValue() instanceof Boolean) {
+                        if (var.getValue() == null || var.getValue() instanceof String && (((String) var.getValue()).equalsIgnoreCase("true") || ((String) var.getValue()).equalsIgnoreCase("false") )) {
                             node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
 
                             if (topVarDeclr == null) {
@@ -424,6 +428,7 @@ public class Parser {
                                 currVarDeclr = currVarDeclr.getNext();
                             }
                         } else {
+                            System.out.println();
                             System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a BOOLEAN.");
                             hadError = true;
                         }
@@ -644,21 +649,31 @@ public class Parser {
             advance();
         }
 
-        if(currToken.getType().equals(NEWLINE)) {//
+        while(currToken.getType().equals(NEWLINE)){
             advance();
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+            }
         }
+
 
         if(currToken.getType().equals(KW_VAR)){
                 head_var = declareMultVars();
         }
 
+
         if(currToken.getType().equals(COMMENT)){
             advance();
         }
 
+
         while(currToken.getType().equals(NEWLINE)){
             advance();
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+            }
         }
+
 
         if(currToken.getType().equals(KW_START)){
             start = currToken;
@@ -678,6 +693,9 @@ public class Parser {
                     advance();
                     while(currToken.getType().equals(NEWLINE)){
                         advance();
+                        if(currToken.getType().equals(COMMENT)){
+                            advance();
+                        }
                     }
                 }
                 
@@ -687,11 +705,18 @@ public class Parser {
                 System.out.println("it returns null2");
                 System.out.println(errToken.getLexeme());
                 goToEof();
-
             }
 
             if (!(currToken.isEofOrStop() || currToken.getType().equals(WHILE))) {
                 head_statement = declareMultStmts();
+            }else if(peekNextTokenType().equals(NEWLINE)){
+                advance();
+                while(currToken.getType().equals(NEWLINE)){
+                    advance();
+                    if(currToken.getType().equals(COMMENT)){
+                        advance();
+                    }
+                }
             }
 
             if(currToken.getType().equals(WHILE)){
@@ -709,11 +734,12 @@ public class Parser {
             }
             else{
                 if(!hadError){
-                    errMsg = "Enexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
+                    errMsg = "Unexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
                 }
 
             }
          }
+
          else {
             if(!hadError){
                 errMsg = "Syntax Error: No START found";
@@ -735,6 +761,7 @@ public class Parser {
              System.out.println(errMsg);
              return null;
          }
+
          else {
              System.out.println("\n== Program Complete. No Errors ==\n");
              return new ProgramNode(head_var, start, head_statement, stop);
