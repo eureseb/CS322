@@ -409,7 +409,7 @@ public class Parser {
                     for (Map.Entry<Token, Object> var : variables.entrySet()) {
                         Object variableValue = var.getValue();
 
-                        if (var.getValue() == null || var.getValue() instanceof Boolean) {
+                        if (var.getValue() == null || var.getValue() instanceof String && (((String) var.getValue()).equalsIgnoreCase("true") || ((String) var.getValue()).equalsIgnoreCase("false") )) {
                             node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
 
                             if (topVarDeclr == null) {
@@ -420,6 +420,7 @@ public class Parser {
                                 currVarDeclr = currVarDeclr.getNext();
                             }
                         } else {
+                            System.out.println();
                             System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a BOOLEAN.");
                             hadError = true;
                         }

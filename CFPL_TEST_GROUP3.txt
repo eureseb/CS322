@@ -1,8 +1,4 @@
-*test
-VAR dsad=1,d=1 AS INT
-*test
+VAR b = TRUE, c = "FALSE" AS BOOL
 START
-*test
-INPUT: dsad, d
-OUTPUT: dsad & d
+OUTPUT: b &
 STOP
