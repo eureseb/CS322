@@ -13,8 +13,8 @@ public class App
 
         //please change depending on environment
 //         File file = new File("C:\\Users\\Adrienne\\Desktop\\CS322\\CS322\\CFPL_TEST_GROUP3.txt");
-        File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
-//        File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322\\CFPL_TEST_GROUP3.txt"); BULAN FILE DIR
+        //File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
+        File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322\\CFPL_TEST_GROUP3.txt");
         try(Scanner fileScanner = new Scanner(file)){
             while(fileScanner.hasNextLine()){
                 source.append(fileScanner.nextLine()).append(fileScanner.hasNextLine() ?

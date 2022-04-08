@@ -656,11 +656,10 @@ public class Parser {
             }
         }
 
-
         if(currToken.getType().equals(KW_VAR)){
                 head_var = declareMultVars();
-        }
 
+        }
 
         if(currToken.getType().equals(COMMENT)){
             advance();
