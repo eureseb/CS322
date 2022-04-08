@@ -101,8 +101,12 @@ public class Parser {
         Token temp = currToken;
         Node nodeExpr;
 
+
         try{
-            if(currToken.getType().equals(IDENTIFIER)){
+            if(currToken.getType().equals(KW_VAR)){
+                throw new IllegalStatementException("Syntax Error: Can't declare variable after START at line " + currToken.getLine());
+            }
+            else if(currToken.getType().equals(IDENTIFIER)){
 
                 advance();
                 if(currToken.getType().equals(EQUALS)){

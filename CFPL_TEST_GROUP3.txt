@@ -1,4 +1,4 @@
-VAR b = TRUE, c = "FALSE" AS BOOL
+VAR n AS FLOAT
 START
-OUTPUT: b &
+VAR b as BOOL
 STOP
