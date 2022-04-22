@@ -74,7 +74,10 @@ public class Lexer {
                 if(currToken.getType().equals(NEWLINE)){
                     comment();
                     break;
-                }else {
+                }else if(getPrevCharacter() == '*'){
+                    comment();
+                    break;
+                }else{
                     addToken(MULTIPLY);
                     break;
                 }
@@ -166,7 +169,7 @@ public class Lexer {
             if(getCurrentCharacter() == '\n') {
                 System.out.println("ERROR: Missing Double Quotes");
                 hadError = true;
-            }else if( getCurrentCharacter() == '#'){
+            }else if(getCurrentCharacter() == '#'){
                 setCurrCharacter('\n');
             }else if(getCurrentCharacter() == '['){
                 if(source.charAt(position.getIndex() + 2) == ']'){
@@ -203,7 +206,6 @@ public class Lexer {
 
         arr[position.getIndex()] = x;
         this.source = new String(arr);
-
     }
 
     private boolean isAlphaNumeric(char c) {
