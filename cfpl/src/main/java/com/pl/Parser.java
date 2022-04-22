@@ -200,7 +200,18 @@ public class Parser {
                 else{
                     throw new IllegalStatementException("Missing ':' after INPUT keyword at line "+currToken.getLine());
                 }
+            } else if(currToken.getType().equals(COMMENT)){
+                advance();
+
+                while(currToken.getType().equals(NEWLINE)){
+                    advance();
+                    if(currToken.getType().equals(COMMENT)){
+                        advance();
+                    }
+                }
             }
+
+
             else{
                 if(currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)){
                     advance();
@@ -656,16 +667,24 @@ public class Parser {
             }
         }
 
-
-        if(currToken.getType().equals(KW_VAR)){
+        while(currToken.getType().equals(KW_VAR)){
                 head_var = declareMultVars();
-        }
 
+            if(currToken.getType().equals(COMMENT)){
+                advance();
+            }
+
+            while(currToken.getType().equals(NEWLINE)){
+                advance();
+                if(currToken.getType().equals(COMMENT)){
+                    advance();
+                }
+            }
+        }
 
         if(currToken.getType().equals(COMMENT)){
             advance();
         }
-
 
         while(currToken.getType().equals(NEWLINE)){
             advance();
@@ -711,6 +730,7 @@ public class Parser {
                 head_statement = declareMultStmts();
             }else if(peekNextTokenType().equals(NEWLINE)){
                 advance();
+
                 while(currToken.getType().equals(NEWLINE)){
                     advance();
                     if(currToken.getType().equals(COMMENT)){
@@ -736,7 +756,6 @@ public class Parser {
                 if(!hadError){
                     errMsg = "Unexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
                 }
-
             }
          }
 
