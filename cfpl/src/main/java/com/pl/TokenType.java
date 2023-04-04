@@ -14,7 +14,7 @@ public enum TokenType {
     KW_INPUT("KW_INPUT"),
     KW_CHAR("KW_CHAR"),
 
-    //Language Specifics
+    // Language Specifics
 
     NEWLINE("NL"), // Value is (#)
     CONCATENATOR("CON"), // Value is (&)
@@ -24,7 +24,7 @@ public enum TokenType {
 
     COMMENT("COM"),
 
-    //Values
+    // Values
 
     STRING("V_STR"),
     CHAR("V_CH"),
@@ -36,15 +36,15 @@ public enum TokenType {
     BOOL_TRUE("V_TRUE"),
     BOOL_FALSE("V_FALSE"),
 
-    //Assignment Operator
+    // Assignment Operator
 
     EQUALS("EQUAL"),
 
-    //Identifier
+    // Identifier
 
     IDENTIFIER("IDEN"),
 
-    //Math Operators
+    // Math Operators
 
     MULTIPLY("MUL"),
     DIVIDE("DIV"),
@@ -52,7 +52,7 @@ public enum TokenType {
     MINUS("SUB"),
     MODULO("MODULO"),
 
-    //Logical Operators
+    // Logical Operators
 
     AND("AND"),
     OR("OR"),
@@ -67,42 +67,55 @@ public enum TokenType {
     LOGICAL_EQUAL("LE"),
     NOT_EQUAL("NE"),
 
-    //Special Characters
+    // Special Characters
     COMMA("COMMA"),
     COLON("COLN"),
 
-    //Grouping Symbols
+    // Grouping Symbols
     PAREN_OPEN("PO"),
     PAREN_CLOSE("PC"),
 
-    //Error
+    // Error
 
     ERROR("ERR"),
 
-    //EXTRA FEATURE
+    // EXTRA FEATURE
     KW_FINAL("FINAL"),
 
-    //Statement Type
+    // Statement Type
     ST_DECLARATION("DECLARATION"),
     ST_ASSIGNMENT("ASSIGNMENT"),
     ST_OUTPUT("OUTPUT"),
     ST_INPUT("INPUT"),
 
-    //End of file
+    // End of file
     EOF("FILE_END"),
     DEFAULT("DEF");
 
     private final String value;
 
-    TokenType(String value){
+    TokenType(String value) {
         this.value = value;
     }
 
-    public static boolean isIdentifier(String token){
+    public static boolean isIdentifier(String token) {
         return token == "IDEN";
     }
 
-    public static boolean isDataType(TokenType tokenType){
+    public static boolean isCondition(TokenType tokenType) {
+        return tokenType == AND ||
+                tokenType == GREATER_OR_EQUAL ||
+                tokenType == NOT ||
+                tokenType == OR ||
+                tokenType == GREATER_THAN ||
+                tokenType == LESS_OR_EQUAL ||
+                tokenType == LESS_THAN ||
+                tokenType == EQUALS ||
+                tokenType == NOT_EQUAL;
+
+    }
+
+    public static boolean isDataType(TokenType tokenType) {
         return tokenType == KW_INT ||
                 tokenType == KW_FLOAT ||
                 tokenType == KW_BOOLEAN ||
