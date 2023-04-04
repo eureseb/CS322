@@ -1,5 +1,6 @@
 package com.pl;
 
+import java.time.chrono.IsoEra;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -465,7 +466,9 @@ public class Logic {
 
     private String getVarValue(String s) {
         Map<String, Object> as = new HashMap<>();
+        System.out.println("Created a new hashmap");
         as = interpreter.getValues();
+        System.out.println("Finished getting Values");
         return as.get(s).toString();
     }
 
