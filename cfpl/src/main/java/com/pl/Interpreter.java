@@ -2,11 +2,13 @@ package com.pl;
 
 
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
 import com.pl.Nodes.*;
 import com.pl.Statements.*;
+import com.pl.Logic.*;
 
 import static com.pl.TokenType.*;
 public class Interpreter {
@@ -29,9 +31,6 @@ public class Interpreter {
         else if(node instanceof AssignStatement){
             visitAssignStmt((AssignStatement)node);
         }
-        else if(node instanceof WhileNode){
-            visitWhileNode((WhileNode)node);
-        }
         else if(node instanceof OutputStatement){
             visitOutputStmt((OutputStatement)node);
         }
@@ -49,6 +48,9 @@ public class Interpreter {
         }
         else if(node instanceof NumberNode){
             return visitNumberNode((NumberNode)node);
+        }
+        else if(node instanceof WhileStatement){
+            visitWhileStmt((WhileStatement)node);
         }
         else{
             illegalVisit(node);
@@ -94,9 +96,69 @@ public class Interpreter {
         }
     }
 
-    public void visitWhileNode(WhileNode wNode){
-        visit(wNode.getWhileStmtDeclaration());
-    }
+    public void visitWhileStmt(WhileStatement whileStmt){
+       Logic L = new Logic();
+       ConditionStatement condition = whileStmt.getCondition();
+       System.out.println("Before getting values");
+       System.out.println(condition.toString());
+
+       Boolean checker = values.isEmpty();
+       System.out.println("Is Values Empty? : " + checker);
+
+        // if(condition.getVar1().getType().equals(IDENTIFIER)){
+        //     Token temp = new Token(types.get(condition.getVar1().getLexeme()),
+        //                             values.get(condition.getVar1().getLexeme()).toString(),
+        //                             values.get(condition.getVar1().getLiteral()).toString(),
+        //                             condition.getVar1().getLine());
+        //     condition.setVar1(temp);
+        // }
+
+        // if(condition.getVar2().getType().equals(IDENTIFIER)){
+        //     Token temp = new Token(types.get(condition.getVar2().getLexeme()),
+        //                             values.get(condition.getVar2().getLexeme()).toString(),
+        //                             values.get(condition.getVar2().getLiteral()).toString(),
+        //                             condition.getVar2().getLine());
+        //     condition.setVar2(temp);
+        // }
+
+        System.out.println("After getting values");
+        System.out.println(whileStmt.toString());
+
+       System.out.println("Testing Logic"); 
+       if(L.LogicHandler(condition) == true){
+        System.out.println("Success\n");
+       }
+       else{
+        System.out.println("Something went wrong\n");
+       }
+
+       System.out.println("TEST PHASE");
+        
+        if(L.LogicHandler(condition) == true){
+            visit(whileStmt.getStatement());
+            System.out.println(condition.toString());
+            if(L.LogicHandler(condition) == true){
+                visit(whileStmt.getStatement());
+                System.out.println(condition.toString());
+                if(L.LogicHandler(condition) == true){
+                    visit(whileStmt.getStatement());
+                    System.out.println(condition.toString());
+                }
+                else{
+                    System.out.println("Something went wrong\n");
+                }
+            }
+            else{
+                System.out.println("Something went wrong\n");
+            }
+        }
+        else{
+            System.out.println("Something went wrong\n");
+        }
+
+       System.out.println("Exiting While");
+
+     }
 
     public void visitOutputStmt(OutputStatement outNode){
         Object outputStmt = visit(outNode.getHeadConcat());
@@ -209,5 +271,9 @@ public class Interpreter {
 
     public String visitStringNode(StringNode strNode){
         return strNode.getString().getLexeme();
+    }
+
+    public Map<String, Object> getValues() {
+        return values;
     }
 }

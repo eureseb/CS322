@@ -25,8 +25,20 @@ public class ConditionStatement extends Statement {
         return this.var1;
     }
 
+    public void setVar1(Token a){
+        this.var1 = a;
+    }
+
+    public void setVar2(Token a){
+        this.var2 = a;
+    }
+
+    public void setLogic(Token l){
+        this.logic = l;
+    }
+
     @Override
     public String toString() {
-        return "(" + var1 + ", " + logic + ", " + var2 + ')'+"\n"+ super.getNext();
+        return "(" + var1 + ", " + logic + ", " + var2 + ')'+"\n";
     }
 }

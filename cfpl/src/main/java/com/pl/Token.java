@@ -15,7 +15,6 @@ public class Token {
         this.line = line;
     }
 
-
     public boolean isPlusOrMinus(){
         return type.equals(PLUS) || type.equals(MINUS);
     }

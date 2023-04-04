@@ -12,9 +12,9 @@ public class App
         StringBuilder source = new StringBuilder();
 
         //please change depending on environment
-//         File file = new File("C:\\Users\\Adrienne\\Desktop\\CS322\\CS322\\CFPL_TEST_GROUP3.txt");
-        File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
-//        File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322\\CFPL_TEST_GROUP3.txt"); BULAN FILE DIR
+        File file = new File("C:\\Users\\Adrienne\\Desktop\\CS322\\CS322\\CFPL_TEST_GROUP3.txt");
+        //File file = new File("D:\\GitHubRepo\\CS322\\CFPL_TEST_GROUP3.txt");
+        //File file = new File("C:\\Users\\PC ADMIN\\IdeaProjects\\CS322\\CFPL_TEST_GROUP3.txt"); BULAN FILE DIR
         try(Scanner fileScanner = new Scanner(file)){
             while(fileScanner.hasNextLine()){
                 source.append(fileScanner.nextLine()).append(fileScanner.hasNextLine() ?
@@ -32,7 +32,7 @@ public class App
                 System.exit(404);
             }
             List<Token> tokens = lexer.scanTokens();
-//          System.out.println("lexer tokens: "+ tokens);
+          //System.out.println("lexer tokens: "+ tokens);
 
             // System.out.println("\n===== Parsing =====\n");
             Parser parser = new Parser(tokens);
@@ -41,7 +41,7 @@ public class App
                 System.out.println("error in parser");
                 System.exit(504);
             }
-//          System.out.println(ast);
+          //System.out.println(ast);
 
             // System.out.println("\n===== Interpreting =====\n");
             Interpreter interpreter = new Interpreter();

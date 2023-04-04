@@ -201,6 +201,52 @@ public class Parser {
                     throw new IllegalStatementException("Missing ':' after INPUT keyword at line "+currToken.getLine());
                 }
             }
+            else if(currToken.getType().equals(WHILE)){
+                System.out.print("CREATE WHILE NODE \n");
+                advance();
+                System.out.println(currToken);
+                if(currToken.getType().equals(PAREN_OPEN)){
+                    advance();
+                    Token left = currToken;
+                    System.out.println(currToken);
+                    advance();
+                    Token logic = currToken;
+                    System.out.println(currToken);
+                    advance();
+                    Token right = currToken;
+                    System.out.println(currToken);
+                    ConditionStatement condition = new ConditionStatement(left, logic, right);
+                    System.out.print(condition.toString());
+                    System.out.println("While Checker: Successfull in Declaring Condition Statement");
+                    advance();
+                    if(currToken.getType().equals(PAREN_CLOSE)){
+                        System.out.println(currToken);
+                        advance();
+                        System.out.println(currToken);
+                        advance();
+                        System.out.println(currToken);
+                        if(currToken.getType().equals(KW_START)){
+                            advance();
+                            System.out.println(currToken);
+                            advance();
+                            System.out.println(currToken);
+                            System.out.println("Checker this is before Statement Declaration");
+                            Node statement = declareMultStmts();
+                            System.out.println("While Checker: Successfull in Declaring Multiple Statements");
+                            System.out.println(currToken);
+                            if(currToken.getType().equals(KW_STOP)){
+                                advance();
+                                System.out.println(currToken);
+                                WhileStatement ctrlNode = new WhileStatement(condition, statement);
+                                return ctrlNode;
+                            }
+                        }
+                    }
+                }
+                else{
+                    throw new IllegalStatementException("Error: Missing '(' at line" + currToken.getLine());
+                }
+            }
             else{
                 if(currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)){
                     advance();
@@ -233,15 +279,14 @@ public class Parser {
             if(!currToken.getType().equals(KW_STOP)){
                 advance();
             }
-
         }
-
         return stmtHead;
     }
 
     private boolean itHasAnotherVariableBeside(){
         return currToken.getType() == COMMA && peekNextTokenType().equals(IDENTIFIER);
     }
+
     VariableDeclarationNode declareVar(){
 
         VariableDeclarationNode topVarDeclr=null;
@@ -516,133 +561,13 @@ public class Parser {
         
     }
 
-    WhileNode looped() {
-        Object whileStart = null, whileStop = null;
-        Node whileHead_statement = null;
-        String errMsg = "";
-
-        System.out.println("Inside looped function, Current Token is:" + currToken.toString());
-
-        advance(); //To check for Open Parenthesis
-        if(!(currToken.getType().equals(PAREN_OPEN))){
-            errMsg = "No Open Parenthesis Found";
-            throw new RuntimeException();
-        }
-
-        List<Token> conditionTokenList = getTokensUntilClose();
-
-        
-        
-        if(conditionTokenList.size() == 0){
-            errMsg = "No Close Parenthesis Found";
-            throw new RuntimeException();
-        }
-
-        //TODO: Check if Condition is Valid
-
-        System.out.println("Checkpoint! After executing getTokensUntilClose Function, Current Token is:" + currToken.toString());
-
-        while(!(currToken.getType().equals(PAREN_CLOSE))){
-            advance();
-        }
-
-        System.out.println("Checkpoint! After advancing token to PAREN_CLOSE, Current Token is:" + currToken.toString());
-
-        //Checking the token list for errors
-        for(int i = 0; i < conditionTokenList.size(); i++){
-            System.out.println(conditionTokenList.get(i).toString());
-        }
-
-        System.out.println("Checkpoint! After checking the token list for errors, Current Token is:" + currToken.toString());
-        
-        while(currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)){
-            advance();
-            System.out.println("Checking for Comments or Newline, Current Token is:" + currToken.toString());
-        }
-
-        //Brute Force, for some reason, it properly advance to the next token.
-        for(int i = 0; i < 2; i++){
-            advance();
-        }
-
-        if(currToken.getType().equals(KW_START)){ //Continue with START keyword
-             whileStart = currToken; // KW_START
-             System.out.println("Checkpoint! Within the [WHILE] START, Current Token is:" + currToken.toString());
-            try{
-                if(peekNextTokenType().equals(EOF)){
-                    errMsg = "No STOP found";
-                    throw new RuntimeException();
-                }
-                else if(peekNextTokenType().equals(KW_STOP)){
-                    errMsg = "START and STOP cannot be 1 line";
-                    throw new RuntimeException();
-                }else if(!peekNextTokenType().equals(NEWLINE)){
-                    errMsg = peekNextTokenType()+" must be in a newline";
-                    throw new RuntimeException();
-                }else if(peekNextTokenType().equals(NEWLINE)){
-                    advance();
-                    while(currToken.getType().equals(NEWLINE)){
-                        advance();
-                    }
-                }
-                
-            }catch(RuntimeException e){
-                errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
-
-                System.out.println("it returns null2");
-                System.out.println(errToken.getLexeme());
-                goToEof();
-
-            }
-
-            System.out.println("Checkpoint! After [WHILE] Try-Catch, Current Token is:" + currToken.toString());
-
-            if(!(currToken.isEofOrStop())){
-                whileHead_statement = declareMultStmts();
-            }
-
-            System.out.println("Checkpoint! After [WHILE] isEofOrStop Checker, Current Token is:" + currToken.toString());
-            
-            if(currToken.getType().equals(KW_STOP)){
-                whileStop = currToken;
-                advance();
-                System.out.println("Checkpoint! After [WHILE] Token Value is STOP, Current Token is:" + currToken.toString());
-            }
-            else{
-
-                if(hadError != true){
-                    System.out.println("[WHILE] Had Error on Token: " + currToken.toString());
-                    System.out.println("[WHILE] it returns null3");
-                    errToken.getLexeme();
-                }
-                hadError = true;
-
-            }
-         }
-         else {
-            if(hadError != true){
-                errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
-
-                System.out.println("[WHILE] it returns null4");
-                System.out.println(errToken.getLexeme());
-                System.out.println("[WHILE] No START found");
-            }
-             hadError=true;
-         }
-
-         if(hadError){
-             return null;
-         }else{
-             System.out.println("\n== WhileNode Program Complete. No Errors ==\n");
-             return new WhileNode(whileStart, whileHead_statement, whileStop);
-         }
-    }
-
     ProgramNode program() {
         Node head_var = null;
         Object start = null, stop = null;
         Node head_statement = null;
+        Node while_loop = null;
         String errMsg = "";
+        int flag = 0;
 
 
         if(currToken.getType().equals(COMMENT)){
@@ -707,7 +632,7 @@ public class Parser {
                 goToEof();
             }
 
-            if (!(currToken.isEofOrStop() || currToken.getType().equals(WHILE))) {
+            if(!(currToken.isEofOrStop())) {
                 head_statement = declareMultStmts();
             }else if(peekNextTokenType().equals(NEWLINE)){
                 advance();
@@ -717,10 +642,6 @@ public class Parser {
                         advance();
                     }
                 }
-            }
-
-            if(currToken.getType().equals(WHILE)){
-                looped();
             }
 
              //Brute Force, it needs to advance twice before it sees another STOP
@@ -765,7 +686,7 @@ public class Parser {
          else {
              System.out.println("\n== Program Complete. No Errors ==\n");
              return new ProgramNode(head_var, start, head_statement, stop);
+             }
          }
     }
 
-}

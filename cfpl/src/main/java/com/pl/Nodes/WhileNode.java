@@ -1,20 +1,23 @@
 package com.pl.Nodes;
 
 public class WhileNode extends Node {
-    Object whileStart;
-    Object whileStop;
-    private Node whileStmtDeclaration;
+    private Node statement;
+    private Node condition;
 
-    public WhileNode(Object whileStart, Node whileStatements, Object whileStop) {
-        this.whileStart = whileStart;
-        this.whileStmtDeclaration = whileStatements;
-        this.whileStop = whileStop;
+    public WhileNode(Node condition, Node statement) {
+        this.statement = statement;
+        this.condition = condition;
     }
 
-    public Node getWhileStmtDeclaration(){
-        return this.whileStmtDeclaration;
+    public Node getWhileStatement(){
+        return this.statement;
     }
+
+    public Node getWhileCondition(){
+        return this.condition;
+    }
+
     public String toString() {
-        return "(" + this.whileStart + ", \n" + this.whileStmtDeclaration + ", \n" + this.whileStop + ")";
+        return "(" + this.condition + ", \n" + this.statement + ")";
     }
 }
