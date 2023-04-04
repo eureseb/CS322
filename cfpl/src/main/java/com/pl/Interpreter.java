@@ -6,6 +6,8 @@ import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.naming.directory.InvalidAttributeIdentifierException;
+
 import com.pl.Nodes.*;
 import com.pl.Statements.*;
 import com.pl.Logic.*;
@@ -52,6 +54,12 @@ public class Interpreter {
         else if(node instanceof WhileStatement){
             visitWhileStmt((WhileStatement)node);
         }
+        else if(node instanceof IfStatement){
+            visitIfStmt((IfStatement)node);
+        }
+        else if(node instanceof ElseStatement){
+            visitElseStmt((ElseStatement)node);
+        }
         else{
             illegalVisit(node);
         }
@@ -96,69 +104,60 @@ public class Interpreter {
         }
     }
 
-    public void visitWhileStmt(WhileStatement whileStmt){
-       Logic L = new Logic();
-       ConditionStatement condition = whileStmt.getCondition();
-       System.out.println("Before getting values");
-       System.out.println(condition.toString());
+    public void visitIfStmt(IfStatement ifStmt){
+        ConditionStatement cond = ifStmt.getCondition();
+        System.out.println(ifStmt.toString());
 
-       Boolean checker = values.isEmpty();
-       System.out.println("Is Values Empty? : " + checker);
-
-        // if(condition.getVar1().getType().equals(IDENTIFIER)){
-        //     Token temp = new Token(types.get(condition.getVar1().getLexeme()),
-        //                             values.get(condition.getVar1().getLexeme()).toString(),
-        //                             values.get(condition.getVar1().getLiteral()).toString(),
-        //                             condition.getVar1().getLine());
-        //     condition.setVar1(temp);
-        // }
-
-        // if(condition.getVar2().getType().equals(IDENTIFIER)){
-        //     Token temp = new Token(types.get(condition.getVar2().getLexeme()),
-        //                             values.get(condition.getVar2().getLexeme()).toString(),
-        //                             values.get(condition.getVar2().getLiteral()).toString(),
-        //                             condition.getVar2().getLine());
-        //     condition.setVar2(temp);
-        // }
-
-        System.out.println("After getting values");
-        System.out.println(whileStmt.toString());
-
-       System.out.println("Testing Logic"); 
-       if(L.LogicHandler(condition) == true){
-        System.out.println("Success\n");
-       }
-       else{
-        System.out.println("Something went wrong\n");
-       }
-
-       System.out.println("TEST PHASE");
-        
-        if(L.LogicHandler(condition) == true){
-            visit(whileStmt.getStatement());
-            System.out.println(condition.toString());
-            if(L.LogicHandler(condition) == true){
-                visit(whileStmt.getStatement());
-                System.out.println(condition.toString());
-                if(L.LogicHandler(condition) == true){
-                    visit(whileStmt.getStatement());
-                    System.out.println(condition.toString());
-                }
-                else{
-                    System.out.println("Something went wrong\n");
-                }
-            }
-            else{
-                System.out.println("Something went wrong\n");
-            }
+        System.out.print("Testing Logic");
+        if(LogicHandler(cond) == true){
+            System.out.println("Success\n");
         }
         else{
             System.out.println("Something went wrong\n");
         }
 
-       System.out.println("Exiting While");
+        System.out.println("Test Phase\n");
+        if(LogicHandler(cond) == true){
+            visit(ifStmt.getStatement());
+        }else{
+            visit(ifStmt.getNext());
+        }
 
-     }
+       System.out.println("Exiting IF");        
+    }
+
+    public void visitElseStmt(ElseStatement ElseStmt){
+        visit(ElseStmt.getStatement());
+    }
+
+    public void visitWhileStmt(WhileStatement whileStmt){
+
+       Logic L = new Logic();
+       ConditionStatement cond = whileStmt.getCondition();
+       System.out.println("Before getting values");
+       System.out.println(cond.toString());
+
+       Boolean checker = values.isEmpty();
+       System.out.println("Is Values Empty? : " + checker);
+
+        System.out.println("After getting values");
+        System.out.println(whileStmt.toString());
+
+        System.out.println("Testing Logic");
+        if(LogicHandler(cond) == true){
+            System.out.println("Success\n");
+        }
+        else{
+            System.out.println("Something went wrong\n");
+        }
+
+        System.out.println("Test Phase\n");
+        while(LogicHandler(cond) == true){
+            visit(whileStmt.getStatement());
+        }
+
+       System.out.println("Exiting While");
+    }
 
     public void visitOutputStmt(OutputStatement outNode){
         Object outputStmt = visit(outNode.getHeadConcat());
@@ -276,4 +275,444 @@ public class Interpreter {
     public Map<String, Object> getValues() {
         return values;
     }
+
+    private void Error(String err) {
+        System.out.println(err);
+    }
+
+    private boolean LogicHandler(ConditionStatement cond){
+        int Ileft, Iright;
+        String Sleft, Sright;
+        Boolean Bleft, Bright;
+        float Fleft, Fright;
+        Character Cleft, Cright;
+
+        boolean check = false;
+        Token leftToken = cond.getVar1(), rightToken = cond.getVar2(), condition = cond.getLogic();
+        TokenType leftvar = leftToken.getType(), rightvar = rightToken.getType();
+        System.out.println("Left Lexemme: " + leftToken.getLexeme() + "\nLeft TokenType: " + leftvar + "\nRight Lexemme: " + rightToken.getLexeme() + "\nRight TokenType: " + rightvar);
+        // Stupid method cause java var is shit
+        if (leftToken.getType() == TokenType.INT || leftToken.getType() == TokenType.KW_INT || leftToken.getType() == TokenType.IDENTIFIER) {
+            if (leftToken.getType() == TokenType.IDENTIFIER) {
+                var l = Integer.parseInt(values.get(leftToken.getLiteral().toString()).toString()); 
+                Ileft = l;
+                System.out.println("\nLeft Token: " + Ileft);
+            } else {
+                var l = Integer.parseInt(leftToken.getLiteral().toString());
+                Ileft = l;
+                System.out.println("\nLeft Token: " + Ileft);
+            }
+            if (rightToken.getType() == TokenType.INT || rightToken.getType() == TokenType.KW_INT || rightToken.getType() == TokenType.IDENTIFIER) {
+                if (rightToken.getType() == TokenType.IDENTIFIER) {
+                    var r = Integer.parseInt(values.get(rightToken.getLiteral().toString()).toString());
+                    Iright = r;
+                    System.out.println("Right Token: " + Iright);
+                } else {
+                    var r = Integer.parseInt(rightToken.getLiteral().toString());
+                    Iright = r;
+                    System.out.println("Right Token: " + Iright);
+                }
+ 
+                System.out.println("Condition Token: " + condition.getLexeme());
+                switch (condition.getLexeme()) {
+                    case "<":
+                        if (Ileft < Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<=":
+                        if (Ileft <= Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">":
+                        if (Ileft > Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">=":
+                        if (Ileft >= Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<>":
+                        if (Ileft != Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "NOT":
+                        if (Ileft != Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "=":
+                        if (Ileft == Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                }
+            } else if (rightvar == TokenType.BOOL || rightvar == TokenType.KW_BOOLEAN) {
+                Error("Error: can't compare INT to BOOL");
+            } else if (rightvar == TokenType.FLOAT || rightvar == TokenType.KW_FLOAT) {
+                if (rightToken.getType() == TokenType.IDENTIFIER) {
+                    var r = Integer.parseInt(values.get(rightToken.getLiteral().toString()).toString());
+                    Fright = r;
+                } else {
+                    var r = Integer.parseInt(rightToken.getLiteral().toString());
+                    Fright = r;
+                }
+                switch (condition.getLexeme()) {
+                    case "<":
+                        if (Ileft < Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<=":
+                        if (Ileft <= Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">":
+                        if (Ileft > Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">=":
+                        if (Ileft >= Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<>":
+                        if (Ileft != Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "NOT":
+                        if (Ileft != Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "=":
+                        if (Ileft == Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                }
+            } else if (rightvar == TokenType.STRING || rightvar == TokenType.KW_STRING) {
+                Error("Error: can't compare INT to String");
+            }
+ 
+        } else if (leftvar == TokenType.BOOL || leftvar == TokenType.KW_BOOLEAN) {
+            if (leftToken.getType() == TokenType.IDENTIFIER) {
+                var l = Boolean.parseBoolean(values.get(leftToken.getLiteral().toString()).toString());
+                Bleft = l;
+            } else {
+                var l = Boolean.parseBoolean(leftToken.getLiteral().toString());
+                Bleft = l;
+            }
+            if (rightvar == TokenType.INT || rightvar == TokenType.KW_INT) {
+                Error("Error: can't compare INT to BOOL");
+ 
+            } else if (rightvar == TokenType.BOOL || rightvar == TokenType.KW_BOOLEAN) {
+                if (rightToken.getType() == TokenType.IDENTIFIER) {
+                    var r = Boolean.parseBoolean(values.get(rightToken.getLiteral().toString()).toString());
+                    Bright = r;
+                } else {
+                    var r = Boolean.parseBoolean(rightToken.getLiteral().toString());
+                    Bright = r;
+                }
+                switch (condition.getLexeme()) {
+                    case "<":
+                        Error("The operator < is undefined for the argument type(s) boolean, boolean");
+                        break;
+                    case "<=":
+                        Error("The operator <= is undefined for the argument type(s) boolean, boolean");
+                        break;
+                    case ">":
+                        Error("The operator > is undefined for the argument type(s) boolean, boolean");
+                        break;
+                    case ">=":
+                        Error("The operator >= is undefined for the argument type(s) boolean, boolean");
+                        break;
+                    case "<>":
+                        if (Bleft != Bright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "NOT":
+                        if (Bleft != Bright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "=":
+                        if (Bleft == Bright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                }
+            } else if (rightvar == TokenType.FLOAT || rightvar == TokenType.KW_FLOAT) {
+                Error("Error: Can't compare boolean to float");
+            } else if (rightvar == TokenType.STRING || rightvar == TokenType.KW_STRING) {
+                Error("Error: can't compare boolean to String");
+            }
+        } else if (leftvar == TokenType.FLOAT || leftvar == TokenType.KW_FLOAT) {
+            if (leftToken.getType() == TokenType.IDENTIFIER) {
+                var l = Float.parseFloat(values.get(leftToken.getLiteral().toString()).toString());
+                Fleft = l;
+            } else {
+                var l = Float.parseFloat(leftToken.getLiteral().toString());
+                Fleft = l;
+            }
+            if (rightvar == TokenType.INT || rightvar == TokenType.KW_INT) {
+                if (rightToken.getType() == TokenType.IDENTIFIER) {
+                    var r = Integer.parseInt(values.get(rightToken.getLiteral().toString()).toString());
+                    Iright = r;
+                } else {
+                    var r = Integer.parseInt(rightToken.getLiteral().toString());
+                    Iright = r;
+                }
+                switch (condition.getLexeme()) {
+                    case "<":
+                        if (Fleft < Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<=":
+                        if (Fleft <= Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">":
+                        if (Fleft > Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">=":
+                        if (Fleft >= Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<>":
+                        if (Fleft != Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "NOT":
+                        if (Fleft != Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "=":
+                        if (Fleft == Iright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                }
+            } else if (rightvar == TokenType.BOOL || rightvar == TokenType.KW_BOOLEAN) {
+                Error("Error: can't compare FLOAT to BOOL");
+            } else if (rightvar == TokenType.FLOAT || rightvar == TokenType.KW_FLOAT) {
+                if (rightToken.getType() == TokenType.IDENTIFIER) {
+                    var r = Float.parseFloat(values.get(rightToken.getLiteral().toString()).toString());
+                    Fright = r;
+                } else {
+                    var r = Float.parseFloat(rightToken.getLiteral().toString());
+                    Fright = r;
+                }
+                switch (condition.getLexeme()) {
+                    case "<":
+                        if (Fleft < Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<=":
+                        if (Fleft <= Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">":
+                        if (Fleft > Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case ">=":
+                        if (Fleft >= Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "<>":
+                        if (Fleft != Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "NOT":
+                        if (Fleft != Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "=":
+                        if (Fleft == Fright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                }
+            } else if (rightvar == TokenType.STRING || rightvar == TokenType.KW_STRING) {
+                Error("Error: can't compare FLOAT to String");
+            }
+        } else if (leftvar == TokenType.STRING || leftvar == TokenType.KW_STRING) {
+            if (leftToken.getType() == TokenType.IDENTIFIER) {
+                var l = values.get(leftToken.getLiteral().toString()).toString();
+                Sleft = l;
+            } else {
+                var l = values.get(leftToken.getLiteral().toString()).toString();
+                Sleft = l;
+            }
+            if (rightvar == TokenType.INT || rightvar == TokenType.KW_INT) {
+                Error("Error: can't compare STRING to INT");
+            } else if (rightvar == TokenType.BOOL || rightvar == TokenType.KW_BOOLEAN) {
+                Error("Error: can't compare STRING to BOOL");
+            } else if (rightvar == TokenType.FLOAT || rightvar == TokenType.KW_FLOAT) {
+                Error("Error: can't compare STRING to FLOAT");
+            } else if (rightvar == TokenType.STRING || rightvar == TokenType.KW_STRING) {
+                if (rightToken.getType() == TokenType.IDENTIFIER) {
+                    var r = rightToken.getLiteral().toString();
+                    Sright = r;
+                } else {
+                    var r = rightToken.getLiteral().toString();
+                    Sright = r;
+                }
+                switch (condition.getLexeme()) {
+                    case "<":
+                        Error("The operator < is undefined for the argument type(s) String, String");
+                        break;
+                    case "<=":
+                        Error("The operator <= is undefined for the argument type(s) String, String");
+                        break;
+                    case ">":
+                        Error("The operator ? is undefined for the argument type(s) String, String");
+                        break;
+                    case ">=":
+                        Error("The operator >= is undefined for the argument type(s) String, String");
+                        break;
+                    case "<>":
+                        if (Sleft != Sright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "NOT":
+                        if (Sleft != Sright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                    case "=":
+                        if (Sleft == Sright) {
+                            check = true;
+                            break;
+                        } else {
+                            check = false;
+                            break;
+                        }
+                }
+            }
+        }
+        return check;
+     }
 }

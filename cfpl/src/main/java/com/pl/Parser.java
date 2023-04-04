@@ -243,9 +243,71 @@ public class Parser {
                         }
                     }
                 }
-                else{
-                    throw new IllegalStatementException("Error: Missing '(' at line" + currToken.getLine());
+            }
+            else if(currToken.getType().equals(IF)){
+                System.out.println("CREATING IF NODE \n");
+                advance();
+                System.out.println(currToken);
+                if(currToken.getType().equals(PAREN_OPEN)){
+                    advance();
+                    Token left = currToken;
+                    System.out.println(currToken);
+                    advance();
+                    Token logic = currToken;
+                    System.out.println(currToken);
+                    advance();
+                    Token right = currToken;
+                    System.out.println(currToken);
+                    ConditionStatement condition = new ConditionStatement(left, logic, right);
+                    System.out.print(condition.toString());
+                    System.out.println("While Checker: Successfull in Declaring Condition Statement\n");
+                    advance();
+                    if(currToken.getType().equals(PAREN_CLOSE)){
+                        System.out.println(currToken);
+                        advance();
+                        System.out.println(currToken);
+                        advance();
+                        System.out.println(currToken);
+                        if(currToken.getType().equals(KW_START)){
+                            advance();
+                            System.out.println(currToken);
+                            advance();
+                            System.out.println(currToken);
+                            System.out.println("Checker this is before Statement Declaration\n");
+                            Node statement = declareMultStmts();
+                            System.out.println("While Checker: Successfull in Declaring Multiple Statements\n");
+                            System.out.println(currToken);
+                            if(currToken.getType().equals(KW_STOP)){
+                                advance();
+                                System.out.println(currToken);
+                                IfStatement ctrlNode = new IfStatement(condition, statement);
+                                return ctrlNode;
+                            }  
+                        }
+                    }     
                 }
+            }
+            else if(currToken.getType().equals(ELSE)){
+                System.out.println("CREATING ELSE NODE");
+                advance();
+                System.out.println(currToken);
+                advance();
+                if(currToken.getType().equals(KW_START)){
+                    advance();
+                    System.out.println(currToken);
+                    advance();
+                    System.out.println(currToken);
+                    System.out.println("Checker this is before Statement Declaration\n");
+                    Node statement = declareMultStmts();
+                    System.out.println("While Checker: Successfull in Declaring Multiple Statements\n");
+                    System.out.println(currToken);
+                    if(currToken.getType().equals(KW_STOP)){
+                        advance();
+                        System.out.println(currToken);
+                        ElseStatement ctrlNode = new ElseStatement(statement);
+                        return ctrlNode;
+                    }
+                }  
             }
             else{
                 if(currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)){

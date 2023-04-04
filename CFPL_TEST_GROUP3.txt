@@ -1,7 +1,7 @@
-VAR X = 1 AS INT
+VAR X = 3 AS INT
 START
 
-WHILE(X<5)
+WHILE(X < 5)
 START
 X = X + 1
 OUTPUT: X
