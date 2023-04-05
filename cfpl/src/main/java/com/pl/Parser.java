@@ -7,8 +7,10 @@ import static com.pl.TokenType.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.SpecialAction;
+
+import java.util.ArrayList;
 
 public class Parser {
     List<Token> tokens;
@@ -17,45 +19,42 @@ public class Parser {
     public boolean hadError = false;
     Token errToken;
 
-    public Parser(List<Token> tokens){
+    public Parser(List<Token> tokens) {
         this.tokens = tokens;
         ctr = -1;
         advance();
     }
 
-    private void advance(){
+    private void advance() {
         this.ctr += 1;
         if (ctr < tokens.size()) {
             this.currToken = this.tokens.get(ctr);
-        }
-        else System.out.println("Can't advance further");
+        } else
+            System.out.println("Can't advance further");
     }
 
-    Node parse(){
+    Node parse() {
         return program();
     }
 
-    Node factor(){
+    Node factor() {
         temp = currToken;
         Node nodeExpr;
-        if(currToken.isPlusOrMinus()){
+        if (currToken.isPlusOrMinus()) {
             advance();
-            if(currToken.isIntOrFloat()){
+            if (currToken.isIntOrFloat()) {
                 return new UnaryNode(temp, (NumberNode) factor());
             }
-        }
-        else if(currToken.isIntOrFloat()){
+        } else if (currToken.isIntOrFloat()) {
             advance();
             return new NumberNode(temp);
-        }
-        else if(currToken.getType().equals(IDENTIFIER)){
+        } else if (currToken.getType().equals(IDENTIFIER)) {
             advance();
             return new NumberNode(temp);
-        }
-        else if(currToken.getType().equals(PAREN_OPEN)){
+        } else if (currToken.getType().equals(PAREN_OPEN)) {
             advance();
             nodeExpr = expression();
-            if(currToken.getType().equals(PAREN_CLOSE)){
+            if (currToken.getType().equals(PAREN_CLOSE)) {
                 advance();
                 return nodeExpr;
             }
@@ -63,25 +62,25 @@ public class Parser {
         return null;
     }
 
-    Node term(){
+    Node term() {
 
         Node left = this.factor(), right;
         Token operator;
 
-        while(currToken.isMulOrDiv()){
+        while (currToken.isMulOrDiv()) {
 
             operator = currToken;
             advance();
             right = factor();
-            left = new BinaryNode(left, operator,right);
+            left = new BinaryNode(left, operator, right);
         }
         return left;
     }
 
-    Node expression(){
+    Node expression() {
         Node left = this.term(), right;
         Token operator;
-        while(currToken.isPlusOrMinus()){
+        while (currToken.isPlusOrMinus()) {
             operator = currToken;
             advance();
             right = term();
@@ -90,142 +89,188 @@ public class Parser {
         return left;
     }
 
-    public Node concatNode(Node curr, Node nextNode){
+    public Node concatNode(Node curr, Node nextNode) {
         curr.setNext(nextNode);
         curr = nextNode;
         return curr;
     }
 
-
-    Statement declareStmt(){
-        Token identifier, operator;
+    Statement declareStmt() {
+        Token identifier, operator, var1, var2, logic;
+        Token v1, v2, lg2;
         Token temp = currToken;
         Node nodeExpr;
 
-
-        try{
-            if(currToken.getType().equals(KW_VAR)){
-                throw new IllegalStatementException("Syntax Error: Can't declare variable after START at line " + currToken.getLine());
-            }
-            else if(currToken.getType().equals(IDENTIFIER)){
+        try {
+            if (currToken.getType().equals(KW_VAR)) {
+                throw new IllegalStatementException(
+                        "Syntax Error: Can't declare variable after START at line " + currToken.getLine());
+            } else if (currToken.getType().equals(IDENTIFIER)) {
 
                 advance();
-                if(currToken.getType().equals(EQUALS)){
+                if (currToken.getType().equals(EQUALS)) {
                     operator = currToken;
                     advance();
                     nodeExpr = expression();
 
-                    if(currToken.getType() == NEWLINE){
+                    if (currToken.getType() == NEWLINE) {
                         return new AssignStatement(temp, operator, nodeExpr);
-                    }
-                    else {
+                    } else {
                         System.out.println("expected newline, but got a something else needs implementation");
                     }
-                }
-                else{
+                } else {
                     throw new IllegalStatementException("Expected '=' after identifier at line" + currToken.getLine());
                 }
-            }
-            else if(currToken.getType().equals(KW_OUTPUT)){
+            } else if (currToken.getType().equals(KW_OUTPUT)) {
                 advance();
                 OutputStatement outputStatement = new OutputStatement(temp);
                 Node currNode;
-                if(currToken.getType().equals(COLON)){
+                if (currToken.getType().equals(COLON)) {
                     advance();
+                    if (currToken.getType().equals(PAREN_OPEN)) {
+                        advance();
+                        if (currToken.getType().equals(IDENTIFIER) || currToken.isDataType()) {
+                            var1 = currToken;
+                            advance();
+                            if (isCondition(currToken.getType())) {
+                                logic = currToken;
+                                advance();
+                                if (currToken.getType().equals(IDENTIFIER) || currToken.isDataType()) {
+                                    var2 = currToken;
+                                    advance();
+                                    if (currToken.getType().equals(AND) || currToken.getType().equals(OR)
+                                            || currToken.getType().equals(NOT)) {
+                                        OutputStatement ot = new OutputStatement(temp);
+                                        ot.setSpecialLogic(currToken);
+                                        advance();
+                                        if (currToken.getType().equals(IDENTIFIER) || currToken.isDataType()) {
+                                            v1 = currToken;
+                                            advance();
+                                            if (isCondition(currToken.getType())) {
+                                                lg2 = currToken;
+                                                advance();
+                                                if (currToken.getType().equals(IDENTIFIER) || currToken.isDataType()) {
+                                                    v2 = currToken;
+                                                    advance();
+                                                    if (currToken.getType().equals(PAREN_CLOSE)) {
+                                                        ConditionStatement cd2 = new ConditionStatement(v1, lg2, v2);
+                                                        ConditionStatement cd1 = new ConditionStatement(var1, logic,
+                                                                var2);
+                                                        ot.setCondition(cd1);
+                                                        ot.setCondition2(cd2);
+                                                        ot.setFlag(false);
+                                                        return ot;
+                                                    } else {
+                                                        throw new IllegalStatementException("Missing ')'");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (currToken.getType().equals(PAREN_CLOSE)) {
+                                        ConditionStatement cd = new ConditionStatement(var1, logic, var2);
+                                        OutputStatement ot = new OutputStatement(temp);
+                                        ot.setCondition(cd);
+                                        return ot;
+                                    } else {
+                                        throw new IllegalStatementException("Missing ')'");
+                                    }
+                                }
 
-                    if(currToken.getType().equals(STRING) ){
+                            }
+                        }
+
+                    }
+                    if (currToken.getType().equals(STRING)) {
                         outputStatement.setHeadConcat(new StringNode(currToken));
                         advance();
-                    }
-                    else{
+                    } else {
                         nodeExpr = expression();
                         outputStatement.setHeadConcat(nodeExpr);
                     }
                     currNode = outputStatement.getHeadConcat();
 
-                    while (currToken.getType().equals(AND)){
+                    while (currToken.getType().equals(AND)) {
+
                         advance();
-                        if(currToken.getType().equals(STRING)){
+                        if (currToken.getType().equals(STRING)) {
                             currNode = concatNode(currNode, new StringNode(currToken));
                             advance();
-                        }
-                        else{
+                        } else {
                             currNode = concatNode(currNode, expression());
                         }
                     }
+
                     return outputStatement;
                 }
 
-                else{
+                else {
                     throw new IllegalStatementException("Missing ':' after OUTPUT keyword");
 
                 }
-            }
-            else if(currToken.getType().equals(KW_INPUT)){
+            } else if (currToken.getType().equals(KW_INPUT)) {
                 InputStatement topInputNode = null;
                 InputStatement currInputNode = null;
                 InputStatement inputStatement = null;
                 advance();
 
-                if(currToken.getType().equals(COLON)){
+                if (currToken.getType().equals(COLON)) {
                     advance();
 
-                    while(currToken.getType().equals(IDENTIFIER) ){
+                    while (currToken.getType().equals(IDENTIFIER)) {
                         inputStatement = new InputStatement(currToken);
-                        if(topInputNode == null){
-                           topInputNode = currInputNode = inputStatement;
-                        }
-                        else {
+                        if (topInputNode == null) {
+                            topInputNode = currInputNode = inputStatement;
+                        } else {
                             currInputNode.setNext(inputStatement);
                             currInputNode = (InputStatement) currInputNode.getNext();
                         }
                         advance();
-                        if(currToken.getType().equals(COMMA)){
+                        if (currToken.getType().equals(COMMA)) {
                             advance();
-                        }
-                        else if(currToken.getType().equals(NEWLINE)){
+                        } else if (currToken.getType().equals(NEWLINE)) {
 
-                        }
-                        else {
-                            throw new IllegalStatementException("Syntax Error: Invalid INPUT syntax at line " + currToken.getLine());
+                        } else {
+                            throw new IllegalStatementException(
+                                    "Syntax Error: Invalid INPUT syntax at line " + currToken.getLine());
                         }
                     }
 
-                    if(topInputNode == null){
-                        throw new IllegalStatementException("Syntax Error: Expecting identifier " + currToken.getLine() + " but got " + currToken.getType());
+                    if (topInputNode == null) {
+                        throw new IllegalStatementException("Syntax Error: Expecting identifier " + currToken.getLine()
+                                + " but got " + currToken.getType());
                     }
 
                     return topInputNode;
+                } else {
+                    throw new IllegalStatementException(
+                            "Missing ':' after INPUT keyword at line " + currToken.getLine());
                 }
-                else{
-                    throw new IllegalStatementException("Missing ':' after INPUT keyword at line "+currToken.getLine());
-                }
-            }
-            else if(currToken.getType().equals(WHILE)){
+            } else if (currToken.getType().equals(WHILE)) {
                 System.out.print("CREATE WHILE NODE \n");
                 advance();
                 System.out.println(currToken);
-                if(currToken.getType().equals(PAREN_OPEN)){
+                if (currToken.getType().equals(PAREN_OPEN)) {
                     advance();
                     Token left = currToken;
                     System.out.println(currToken);
                     advance();
-                    Token logic = currToken;
+                    Token logic2 = currToken;
                     System.out.println(currToken);
                     advance();
                     Token right = currToken;
                     System.out.println(currToken);
-                    ConditionStatement condition = new ConditionStatement(left, logic, right);
+                    ConditionStatement condition = new ConditionStatement(left, logic2, right);
                     System.out.print(condition.toString());
                     System.out.println("While Checker: Successfull in Declaring Condition Statement");
                     advance();
-                    if(currToken.getType().equals(PAREN_CLOSE)){
+                    if (currToken.getType().equals(PAREN_CLOSE)) {
                         System.out.println(currToken);
                         advance();
                         System.out.println(currToken);
                         advance();
                         System.out.println(currToken);
-                        if(currToken.getType().equals(KW_START)){
+                        if (currToken.getType().equals(KW_START)) {
                             advance();
                             System.out.println(currToken);
                             advance();
@@ -234,7 +279,7 @@ public class Parser {
                             Node statement = declareMultStmts();
                             System.out.println("While Checker: Successfull in Declaring Multiple Statements");
                             System.out.println(currToken);
-                            if(currToken.getType().equals(KW_STOP)){
+                            if (currToken.getType().equals(KW_STOP)) {
                                 advance();
                                 System.out.println(currToken);
                                 WhileStatement ctrlNode = new WhileStatement(condition, statement);
@@ -243,56 +288,81 @@ public class Parser {
                         }
                     }
                 }
-            }
-            else if(currToken.getType().equals(IF)){
+            } else if (currToken.getType().equals(IF)) {
                 System.out.println("CREATING IF NODE \n");
                 advance();
                 System.out.println(currToken);
-                if(currToken.getType().equals(PAREN_OPEN)){
+                boolean specialflag2;
+                Token special = null, left2, logic3, right2;
+                ConditionStatement condition2 = null;
+                if (currToken.getType().equals(PAREN_OPEN)) {
                     advance();
                     Token left = currToken;
                     System.out.println(currToken);
                     advance();
-                    Token logic = currToken;
+                    Token logic2 = currToken;
                     System.out.println(currToken);
                     advance();
                     Token right = currToken;
                     System.out.println(currToken);
-                    ConditionStatement condition = new ConditionStatement(left, logic, right);
+                    ConditionStatement condition = new ConditionStatement(left, logic2, right);
+
                     System.out.print(condition.toString());
-                    System.out.println("While Checker: Successfull in Declaring Condition Statement\n");
+                    System.out.println("IF Checker: Successfull in Declaring Condition Statement\n");
                     advance();
-                    if(currToken.getType().equals(PAREN_CLOSE)){
+                    if (currToken.getType().equals(AND) || currToken.getType().equals(OR)
+                            || currToken.getType().equals(NOT)) {
+                        special = currToken;
+                        System.out.println(currToken + "SPECIAL");
+                        specialflag2 = true;
+                        advance();
+                        left2 = currToken;
+                        System.out.println(currToken);
+
+                        advance();
+                        logic3 = currToken;
+                        System.out.println(currToken);
+                        advance();
+                        right2 = currToken;
+                        System.out.println(currToken);
+                        condition2 = new ConditionStatement(left2, logic3, right2);
+                        advance();
+                    }
+                    if (currToken.getType().equals(PAREN_CLOSE)) {
                         System.out.println(currToken);
                         advance();
                         System.out.println(currToken);
                         advance();
                         System.out.println(currToken);
-                        if(currToken.getType().equals(KW_START)){
+                        if (currToken.getType().equals(KW_START)) {
                             advance();
                             System.out.println(currToken);
                             advance();
                             System.out.println(currToken);
                             System.out.println("Checker this is before Statement Declaration\n");
                             Node statement = declareMultStmts();
-                            System.out.println("While Checker: Successfull in Declaring Multiple Statements\n");
+                            System.out.println("IF Checker: Successfull in Declaring Multiple Statements\n");
                             System.out.println(currToken);
-                            if(currToken.getType().equals(KW_STOP)){
+                            if (currToken.getType().equals(KW_STOP)) {
                                 advance();
                                 System.out.println(currToken);
-                                IfStatement ctrlNode = new IfStatement(condition, statement);
+                                IfStatement ctrlNode;
+                                if (specialflag2 = true) {
+                                    ctrlNode = new IfStatement(condition, condition2, special, specialflag2, statement);
+                                } else {
+                                    ctrlNode = new IfStatement(condition, statement);
+                                }
                                 return ctrlNode;
-                            }  
+                            }
                         }
-                    }     
+                    }
                 }
-            }
-            else if(currToken.getType().equals(ELSE)){
+            } else if (currToken.getType().equals(ELSE)) {
                 System.out.println("CREATING ELSE NODE");
                 advance();
                 System.out.println(currToken);
                 advance();
-                if(currToken.getType().equals(KW_START)){
+                if (currToken.getType().equals(KW_START)) {
                     advance();
                     System.out.println(currToken);
                     advance();
@@ -301,64 +371,61 @@ public class Parser {
                     Node statement = declareMultStmts();
                     System.out.println("While Checker: Successfull in Declaring Multiple Statements\n");
                     System.out.println(currToken);
-                    if(currToken.getType().equals(KW_STOP)){
+                    if (currToken.getType().equals(KW_STOP)) {
                         advance();
                         System.out.println(currToken);
                         ElseStatement ctrlNode = new ElseStatement(statement);
                         return ctrlNode;
                     }
-                }  
-            }
-            else{
-                if(currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)){
+                }
+            } else {
+                if (currToken.getType().equals(NEWLINE) || currToken.getType().equals(COMMENT)) {
                     advance();
-                }
-                else{
-                    throw new IllegalStatementException("Error: Current token: " + currToken + " at line " + currToken.getLine());
+                } else {
+                    throw new IllegalStatementException(
+                            "Error: Current token: " + currToken + " at line " + currToken.getLine());
                 }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         return null;
     }
 
-
-    Statement declareMultStmts(){
+    Statement declareMultStmts() {
         Statement stmtHead = declareStmt();
         Statement curr = stmtHead;
         advance();
 
-        while(curr.getNext() != null){
+        while (curr.getNext() != null) {
             curr = curr.getNext();
         }
-        while(currToken.getType().equals(NEWLINE)){
+        while (currToken.getType().equals(NEWLINE)) {
             advance();
         }
-        while(!(currToken.isEofOrStop())){
+        while (!(currToken.isEofOrStop())) {
             curr.setNext(declareStmt());
             curr = curr.getNext();
-            if(!currToken.getType().equals(KW_STOP)){
+            if (!currToken.getType().equals(KW_STOP)) {
                 advance();
             }
         }
         return stmtHead;
     }
 
-    private boolean itHasAnotherVariableBeside(){
+    private boolean itHasAnotherVariableBeside() {
         return currToken.getType() == COMMA && peekNextTokenType().equals(IDENTIFIER);
     }
 
-    VariableDeclarationNode declareVar(){
+    VariableDeclarationNode declareVar() {
 
-        VariableDeclarationNode topVarDeclr=null;
-        VariableDeclarationNode currVarDeclr=null;
+        VariableDeclarationNode topVarDeclr = null;
+        VariableDeclarationNode currVarDeclr = null;
         VariableDeclarationNode node;
         Token identifier;
         Node factor;
 
-
-        if(currToken.getType().equals(KW_VAR)) {
+        if (currToken.getType().equals(KW_VAR)) {
             advance();
             Map<Token, Object> variables = new HashMap<>();
 
@@ -385,7 +452,8 @@ public class Parser {
 
                             if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside())) {
                                 System.out.println("Error at Token:" + currToken.toString());
-                                System.out.println("Syntax error at token " + currToken.getType() + " at line " + currToken.getLine());
+                                System.out.println("Syntax error at token " + currToken.getType() + " at line "
+                                        + currToken.getLine());
                                 hadError = true;
                                 return null;
                             }
@@ -396,9 +464,10 @@ public class Parser {
                             variables.put(identifier, currToken.getLiteral());
                             advance();
 
-                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside() )) {
+                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside())) {
                                 System.out.println("Error at Token:" + currToken.toString());
-                                System.out.println("Syntax error at token " + currToken.getType() + " at line " + currToken.getLine());
+                                System.out.println("Syntax error at token " + currToken.getType() + " at line "
+                                        + currToken.getLine());
                                 hadError = true;
                                 return null;
                             }
@@ -408,7 +477,7 @@ public class Parser {
                             factor = factor();
 
                             if (factor instanceof UnaryNode) {
-                                UnaryNode currNode = (UnaryNode)factor;
+                                UnaryNode currNode = (UnaryNode) factor;
                                 NumberNode currNumNode = currNode.getNum();
                                 TokenType numNodeType = currNumNode.getNum().getType();
 
@@ -416,26 +485,25 @@ public class Parser {
 
                                 if (numNodeType.equals(INT)) {
                                     value = Integer.parseInt(value.toString());
-                                }
-                                else if (numNodeType.equals(FLOAT)) {
+                                } else if (numNodeType.equals(FLOAT)) {
                                     value = Float.parseFloat(value.toString());
-                                }
-                                else {
-                                    System.out.println("Invalid value declaration at line " + currToken.getLine() + " for identifier " + identifier);
+                                } else {
+                                    System.out.println("Invalid value declaration at line " + currToken.getLine()
+                                            + " for identifier " + identifier);
                                     hadError = true;
                                 }
 
-                            }
-                            else if (factor instanceof NumberNode) {
-                                NumberNode currNode = (NumberNode)factor;
+                            } else if (factor instanceof NumberNode) {
+                                NumberNode currNode = (NumberNode) factor;
                                 value = (currNode.getNum().getLiteral());
                             }
 
                             variables.put(identifier, value);
 
-                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside()) ) {
+                            if (!(currToken.getType() == KW_AS || itHasAnotherVariableBeside())) {
                                 System.out.println("Error at Token:" + currToken.toString());
-                                System.out.println("Syntax error at token " + currToken.getType() + " at line " + currToken.getLine());
+                                System.out.println("Syntax error at token " + currToken.getType() + " at line "
+                                        + currToken.getLine());
                                 hadError = true;
                                 return null;
                             }
@@ -475,19 +543,19 @@ public class Parser {
                             node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
                             if (topVarDeclr == null) {
                                 topVarDeclr = currVarDeclr = node;
-                            }
-                            else {
+                            } else {
                                 currVarDeclr.setNext(node);
                                 currVarDeclr = currVarDeclr.getNext();
                             }
                         } else {
-                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected an INTEGER.");
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line "
+                                    + var.getKey().getLine() + ". Expected an INTEGER.");
                             hadError = true;
                         }
                     }
                     break;
 
-                case KW_FLOAT:      //int can be assigned as float
+                case KW_FLOAT: // int can be assigned as float
                     for (Map.Entry<Token, Object> var : variables.entrySet()) {
                         Object variableValue = var.getValue();
 
@@ -497,24 +565,24 @@ public class Parser {
 
                             if (topVarDeclr == null) {
                                 topVarDeclr = currVarDeclr = node;
-                            }
-                            else {
+                            } else {
                                 currVarDeclr.setNext(node);
                                 currVarDeclr = currVarDeclr.getNext();
                             }
 
-                        } else if (var.getValue() instanceof Integer) {     //if value is an int, convert to float
-                            node = new VariableDeclarationNode(var.getKey(), dataType, Float.parseFloat(var.getValue().toString()));
+                        } else if (var.getValue() instanceof Integer) { // if value is an int, convert to float
+                            node = new VariableDeclarationNode(var.getKey(), dataType,
+                                    Float.parseFloat(var.getValue().toString()));
 
                             if (topVarDeclr == null) {
                                 topVarDeclr = currVarDeclr = node;
-                            }
-                            else {
+                            } else {
                                 currVarDeclr.setNext(node);
                                 currVarDeclr = currVarDeclr.getNext();
                             }
                         } else {
-                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a FLOAT.");
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line "
+                                    + var.getKey().getLine() + ". Expected a FLOAT.");
                             hadError = true;
                         }
                     }
@@ -524,19 +592,21 @@ public class Parser {
                     for (Map.Entry<Token, Object> var : variables.entrySet()) {
                         Object variableValue = var.getValue();
 
-                        if (var.getValue() == null || var.getValue() instanceof String && (((String) var.getValue()).equalsIgnoreCase("true") || ((String) var.getValue()).equalsIgnoreCase("false") )) {
+                        if (var.getValue() == null || var.getValue() instanceof String
+                                && (((String) var.getValue()).equalsIgnoreCase("true")
+                                        || ((String) var.getValue()).equalsIgnoreCase("false"))) {
                             node = new VariableDeclarationNode(var.getKey(), dataType, variableValue);
 
                             if (topVarDeclr == null) {
                                 topVarDeclr = currVarDeclr = node;
-                            }
-                            else {
+                            } else {
                                 currVarDeclr.setNext(node);
                                 currVarDeclr = currVarDeclr.getNext();
                             }
                         } else {
                             System.out.println();
-                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a BOOLEAN.");
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line "
+                                    + var.getKey().getLine() + ". Expected a BOOLEAN.");
                             hadError = true;
                         }
                     }
@@ -551,13 +621,13 @@ public class Parser {
 
                             if (topVarDeclr == null) {
                                 topVarDeclr = currVarDeclr = node;
-                            }
-                            else {
+                            } else {
                                 currVarDeclr.setNext(node);
                                 currVarDeclr = currVarDeclr.getNext();
                             }
                         } else {
-                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line " + var.getKey().getLine() + ". Expected a CHARACTER.");
+                            System.out.println("Incompatible datatypes for identifier " + var.getKey() + " at line "
+                                    + var.getKey().getLine() + ". Expected a CHARACTER.");
                             hadError = true;
                         }
                     }
@@ -569,58 +639,58 @@ public class Parser {
         return null;
     }
 
-
-    Node declareMultVars(){
+    Node declareMultVars() {
         VariableDeclarationNode head = declareVar();
-        VariableDeclarationNode curr= head;
+        VariableDeclarationNode curr = head;
 
         advance();
 
-        while(currToken.getType().equals(NEWLINE)){
+        while (currToken.getType().equals(NEWLINE)) {
             advance();
         }
-        while (currToken.getType().equals(KW_VAR)){
-                curr.setNext(declareVar());
-                while(curr.getNext() != null){
-                    curr = curr.getNext();
-                }
-                advance();
-                advance();
+        while (currToken.getType().equals(KW_VAR)) {
+            curr.setNext(declareVar());
+            while (curr.getNext() != null) {
+                curr = curr.getNext();
+            }
+            advance();
+            advance();
         }
 
         return head;
     }
-    
-    void goToEof(){
-        while(!currToken.getType().equals(EOF)){
+
+    void goToEof() {
+        while (!currToken.getType().equals(EOF)) {
             advance();
         }
     }
-    TokenType peekNextTokenType(){
-        return tokens.get(ctr+1).getType();
-    }
-    TokenType peekPrevTokenType(){
-        return tokens.get(ctr-1).getType();
+
+    TokenType peekNextTokenType() {
+        return tokens.get(ctr + 1).getType();
     }
 
-    private List<Token> getTokensUntilClose(){
+    TokenType peekPrevTokenType() {
+        return tokens.get(ctr - 1).getType();
+    }
+
+    private List<Token> getTokensUntilClose() {
         List<Token> result = new ArrayList<Token>();
         boolean foundClose = false;
-        for(int i = this.ctr; i < this.tokens.size(); i++){
+        for (int i = this.ctr; i < this.tokens.size(); i++) {
             System.out.println("This is: " + this.tokens.get(i).toString());
-            if(this.tokens.get(i).getType().equals(PAREN_CLOSE)){
+            if (this.tokens.get(i).getType().equals(PAREN_CLOSE)) {
                 foundClose = true;
                 break;
             }
             result.add(this.tokens.get(i));
         }
-        if(foundClose){
+        if (foundClose) {
             return result;
-        }
-        else{
+        } else {
             return new ArrayList<Token>();
         }
-        
+
     }
 
     ProgramNode program() {
@@ -631,62 +701,56 @@ public class Parser {
         String errMsg = "";
         int flag = 0;
 
-
-        if(currToken.getType().equals(COMMENT)){
+        if (currToken.getType().equals(COMMENT)) {
             advance();
         }
 
-        while(currToken.getType().equals(NEWLINE)){
+        while (currToken.getType().equals(NEWLINE)) {
             advance();
-            if(currToken.getType().equals(COMMENT)){
+            if (currToken.getType().equals(COMMENT)) {
                 advance();
             }
         }
 
-
-        if(currToken.getType().equals(KW_VAR)){
-                head_var = declareMultVars();
+        if (currToken.getType().equals(KW_VAR)) {
+            head_var = declareMultVars();
         }
 
-
-        if(currToken.getType().equals(COMMENT)){
+        if (currToken.getType().equals(COMMENT)) {
             advance();
         }
 
-
-        while(currToken.getType().equals(NEWLINE)){
+        while (currToken.getType().equals(NEWLINE)) {
             advance();
-            if(currToken.getType().equals(COMMENT)){
+            if (currToken.getType().equals(COMMENT)) {
                 advance();
             }
         }
 
-
-        if(currToken.getType().equals(KW_START)){
+        if (currToken.getType().equals(KW_START)) {
             start = currToken;
 
-            try{
-                if(peekNextTokenType().equals(EOF)){
+            try {
+                if (peekNextTokenType().equals(EOF)) {
                     errMsg = "No STOP found";
                     throw new RuntimeException();
-                }
-                else if(peekNextTokenType().equals(KW_STOP)){
+                } else if (peekNextTokenType().equals(KW_STOP)) {
                     errMsg = "START and STOP cannot be 1 line";
                     throw new RuntimeException();
-                }else if(!peekNextTokenType().equals(NEWLINE)){
-                    errMsg = peekNextTokenType()+" must be in a newline";
+                } else if (!peekNextTokenType().equals(NEWLINE)) {
+                    errMsg = peekNextTokenType() + " must be in a newline";
                     throw new RuntimeException();
-                }else if(peekNextTokenType().equals(NEWLINE)){
+                } else if (peekNextTokenType().equals(NEWLINE)) {
                     advance();
-                    while(currToken.getType().equals(NEWLINE)){
+                    while (currToken.getType().equals(NEWLINE)) {
                         advance();
-                        if(currToken.getType().equals(COMMENT)){
+                        if (currToken.getType().equals(COMMENT)) {
                             advance();
                         }
                     }
                 }
-                
-            }catch(RuntimeException e){
+
+            } catch (RuntimeException e) {
                 errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
 
                 System.out.println("it returns null2");
@@ -694,61 +758,70 @@ public class Parser {
                 goToEof();
             }
 
-            if(!(currToken.isEofOrStop())) {
+            if (!(currToken.isEofOrStop())) {
                 head_statement = declareMultStmts();
-            }else if(peekNextTokenType().equals(NEWLINE)){
+            } else if (peekNextTokenType().equals(NEWLINE)) {
                 advance();
-                while(currToken.getType().equals(NEWLINE)){
+                while (currToken.getType().equals(NEWLINE)) {
                     advance();
-                    if(currToken.getType().equals(COMMENT)){
+                    if (currToken.getType().equals(COMMENT)) {
                         advance();
                     }
                 }
             }
 
-             //Brute Force, it needs to advance twice before it sees another STOP
-             while(!(currToken.getType().equals(KW_STOP))){
+            // Brute Force, it needs to advance twice before it sees another STOP
+            while (!(currToken.getType().equals(KW_STOP))) {
                 advance();
             }
 
             if (currToken.getType().equals(KW_STOP)) {
                 stop = currToken;
                 advance();
-            }
-            else{
-                if(!hadError){
+            } else {
+                if (!hadError) {
                     errMsg = "Unexpected error at " + currToken.getLine() + " with token " + currToken.getLexeme();
                 }
 
             }
-         }
+        }
 
-         else {
-            if(!hadError){
+        else {
+            if (!hadError) {
                 errMsg = "Syntax Error: No START found";
                 hadError = true;
             }
-         }
+        }
 
-         while(currToken.getType() == NEWLINE){
-             advance();
-         }
+        while (currToken.getType() == NEWLINE) {
+            advance();
+        }
 
-         if(!hadError && currToken.getType() != EOF){
-             errMsg = "Found " + currToken.getType() + " token after STOP. Check syntax";
-             hadError = true;
-         }
+        if (!hadError && currToken.getType() != EOF) {
+            errMsg = "Found " + currToken.getType() + " token after STOP. Check syntax";
+            hadError = true;
+        }
 
-         if (hadError) {
-             errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
-             System.out.println(errMsg);
-             return null;
-         }
+        if (hadError) {
+            errToken = new Token(TokenType.ERROR, errMsg, null, currToken.getLine());
+            System.out.println(errMsg);
+            return null;
+        }
 
-         else {
-             System.out.println("\n== Program Complete. No Errors ==\n");
-             return new ProgramNode(head_var, start, head_statement, stop);
-             }
-         }
+        else {
+            System.out.println("\n== Program Complete. No Errors ==\n");
+            return new ProgramNode(head_var, start, head_statement, stop);
+        }
     }
 
+    private boolean isCondition(TokenType tokentType) {
+        boolean flag2 = false;
+        if (tokentType.equals(GREATER_THAN) || tokentType.equals(EQUALS) || tokentType.equals(LESS_THAN)
+                || tokentType.equals(GREATER_OR_EQUAL) || tokentType.equals(LESS_OR_EQUAL)
+                || tokentType.equals(NOT_EQUAL)) {
+            flag2 = true;
+        }
+
+        return flag2;
+    }
+}
