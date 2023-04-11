@@ -35,13 +35,12 @@ public class Lexer {
         reserved.put("WHILE", WHILE);
     }
 
-    Lexer(String source){
+    Lexer(String source) {
         this.source = source;
         this.position = new Position(0, 1, 0, source.length());
         this.currToken = new Token(DEFAULT, "", null, 1);
     }
 
-    
     public List<Token> scanTokens() {
 
         while (!isAtEnd()) {
@@ -51,6 +50,7 @@ public class Lexer {
 
         return tokens;
     }
+
     private void scanToken() {
         char c = nextCharacterFromSource();
         switch (c) {
@@ -71,13 +71,13 @@ public class Lexer {
                 addToken(PLUS);
                 break;
             case '*':
-                if(currToken.getType().equals(NEWLINE)){
+                if (currToken.getType().equals(NEWLINE)) {
                     comment();
                     break;
-                }else if(getPrevCharacter() == '*'){
+                } else if (getPrevCharacter() == '*') {
                     comment();
                     break;
-                }else {
+                } else {
                     addToken(MULTIPLY);
                     break;
                 }
@@ -99,7 +99,7 @@ public class Lexer {
                 break;
             case '<':
                 if (match('=')) {
-                    addToken(GREATER_OR_EQUAL);
+                    addToken(LESS_OR_EQUAL);
                 } else if (match('>')) {
                     addToken(NOT_EQUAL);
                 } else {
@@ -154,10 +154,9 @@ public class Lexer {
         int end = position.getIndex();
 
         if (tokenType == INT) {
-            addToken(INT, Integer.parseInt(source.substring(start-1, end)), start-1, end+1);
-        }
-        else {
-            addToken(FLOAT, Float.parseFloat(source.substring(start-1, end)), start-1, end+1);
+            addToken(INT, Integer.parseInt(source.substring(start - 1, end)), start - 1, end + 1);
+        } else {
+            addToken(FLOAT, Float.parseFloat(source.substring(start - 1, end)), start - 1, end + 1);
         }
     }
 
@@ -166,24 +165,24 @@ public class Lexer {
 
         while (peek() != '\"' && peekNext() != '\n' && !isAtEnd()) {
 
-            if(getCurrentCharacter() == '\n') {
+            if (getCurrentCharacter() == '\n') {
                 System.out.println("ERROR: Missing Double Quotes");
                 hadError = true;
-            }else if( getCurrentCharacter() == '#'){
+            } else if (getCurrentCharacter() == '#') {
                 setCurrCharacter('\n');
-            }else if(getCurrentCharacter() == '['){
-                if(source.charAt(position.getIndex() + 2) == ']'){
+            } else if (getCurrentCharacter() == '[') {
+                if (source.charAt(position.getIndex() + 2) == ']') {
                     char temp;
                     nextCharacterFromSource();
                     temp = getCurrentCharacter();
                     nextCharacterFromSource();
                     setCurrCharacter(temp);
-                }else{
+                } else {
                     System.out.println("ERROR: Missing ]");
                     hadError = true;
                 }
 
-            } else if(isAReservedChar(getCurrentCharacter())){
+            } else if (isAReservedChar(getCurrentCharacter())) {
                 hadError = true;
             }
             tempStr.append(getCurrentCharacter());
@@ -194,14 +193,14 @@ public class Lexer {
         String s = tempStr.toString();
         TokenType t = reserved.get(s);
 
-        if (t == null){
+        if (t == null) {
             t = STRING;
         }
 
         addToken(t, s, s);
     }
 
-    private void setCurrCharacter(char x){
+    private void setCurrCharacter(char x) {
         char[] arr = this.source.toCharArray();
 
         arr[position.getIndex()] = x;
@@ -220,24 +219,25 @@ public class Lexer {
         }
         int end = position.getIndex();
 
-        String s = source.substring(start-1, end);
+        String s = source.substring(start - 1, end);
         TokenType t = reserved.get(s);
-        if (t == null){
+        if (t == null) {
             t = IDENTIFIER;
         }
-        addToken(t, s, start-1, end);
+        addToken(t, s, start - 1, end);
     }
+
     private void addToken(TokenType type) {
-        addToken(type, null, position.getIndex()-1, position.getIndex());
+        addToken(type, null, position.getIndex() - 1, position.getIndex());
         ctr++;
     }
 
-    private void addToken(TokenType type, String text, String literal){
+    private void addToken(TokenType type, String text, String literal) {
         currToken = new Token(type, text, literal, position.getLine());
         tokens.add(currToken);
     }
 
-    private void addToken(TokenType type, Object literal , int startPos, int endPos) {
+    private void addToken(TokenType type, Object literal, int startPos, int endPos) {
         String text = source.substring(startPos, endPos);
         currToken = new Token(type, text, literal, position.getLine());
         tokens.add(currToken);
@@ -246,7 +246,7 @@ public class Lexer {
     private boolean match(char expected) {
         if (isAtEnd())
             return false;
-        if (source.charAt( position.getIndex() ) != expected)
+        if (source.charAt(position.getIndex()) != expected)
             return false;
 
         position.advancePosition(getCurrentCharacter());
@@ -268,13 +268,15 @@ public class Lexer {
         int end = position.getIndex();
 
         String value = source.substring(start + 1, end);
-        addToken(KW_CHAR, value, start+1, end);
+        addToken(KW_CHAR, value, start + 1, end);
     }
+
     private char peek() {
         if (isAtEnd())
             return '\0';
         return getCurrentCharacter();
     }
+
     private char peekNext() {
         if (position.getIndex() + 1 >= source.length())
             return '\0';
@@ -283,20 +285,28 @@ public class Lexer {
 
     private void error(int line, String message) {
         hadError = true;
-        System.out.println("[line: " + line + "," + "col: "+ position.getCol() + "] Error" + getCurrentCharacter() + ": " + message);
+        System.out.println("[line: " + line + "," + "col: " + position.getCol() + "] Error" + getCurrentCharacter()
+                + ": " + message);
     }
+
     private char nextCharacterFromSource() {
         char currentCharacter = getCurrentCharacter();
         position.advancePosition(currentCharacter);
         return currentCharacter;
     }
-    private char getCurrentCharacter(){
+
+    private char getCurrentCharacter() {
         return source.charAt(position.getIndex());
     }
-    private boolean isAReservedChar(char c){
+
+    private boolean isAReservedChar(char c) {
         return c == '&' || c == '"';
     }
-    private char getPrevCharacter() {return source.charAt(position.getIndex()-1);}
+
+    private char getPrevCharacter() {
+        return source.charAt(position.getIndex() - 1);
+    }
+
     private boolean isAtEnd() {
         return position.getIndex() >= source.length();
     }
@@ -305,12 +315,11 @@ public class Lexer {
 
         nextCharacterFromSource();
         int start = position.getIndex();
-        while(!(getCurrentCharacter() == '\n'))
-        {
-           nextCharacterFromSource();
+        while (!(getCurrentCharacter() == '\n')) {
+            nextCharacterFromSource();
         }
         int end = position.getIndex();
 
-        addToken(COMMENT, source.substring(start-1, end), start-1, end);
+        addToken(COMMENT, source.substring(start - 1, end), start - 1, end);
     }
 }

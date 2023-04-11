@@ -113,8 +113,14 @@ public class Interpreter {
             System.out.println("Test Phase\n");
             if (logicflag2 == true) {
                 visit(ifStmt.getStatement());
+                // System.out.println("Logic1: " + LogicHandler(cond));
+                // System.out.println("Logic2: " + LogicHandler(cond2));
+                // System.out.println("Logicflag " + logicflag2);
             } else {
                 visit(ifStmt.getNext());
+                // System.out.println("Logic1: " + LogicHandler(cond));
+                // System.out.println("Logic2: " + LogicHandler(cond2));
+                // System.out.println("Logicflag " + logicflag2);
             }
         } else {
             if (LogicHandler(cond) == true) {
@@ -140,6 +146,9 @@ public class Interpreter {
 
         Logic L = new Logic();
         ConditionStatement cond = whileStmt.getCondition();
+        ConditionStatement cond2 = whileStmt.getCondition2();
+        Token special = whileStmt.getSpecialType();
+        boolean flag = whileStmt.getSpecialCheck();
         System.out.println("Before getting values");
         System.out.println(cond.toString());
 
@@ -150,18 +159,50 @@ public class Interpreter {
         System.out.println(whileStmt.toString());
 
         System.out.println("Testing Logic");
-        if (LogicHandler(cond) == true) {
-            System.out.println("Success\n");
+
+        if (flag == true) {
+            System.out.println("Logic1: " + LogicHandler(cond));
+            System.out.println("Logic2: " + LogicHandler(cond2));
+            System.out.println("Special: " + special);
+            boolean logicflag2 = LogicHandler2(LogicHandler(cond), special, LogicHandler(cond2));
+
+            System.out.println("Cond1" + cond.getLogic());
+            System.out.println("Cond2" + cond2.getLogic());
+            if (logicflag2 == true) {
+                System.out.println("Success\n");
+            } else {
+                System.out.println("Something went wrong\n");
+            }
+
+            System.out.println("Test Phase\n");
+            int x = 1;
+            while (logicflag2 == true) {
+
+                logicflag2 = LogicHandler2(LogicHandler(cond), special, LogicHandler(cond2));
+                System.out.println("X=" + x);
+                x++;
+                visit(whileStmt.getStatement());
+
+                // System.out.println("Logic1: " + LogicHandler(cond));
+                // System.out.println("Logic2: " + LogicHandler(cond2));
+                // System.out.println("Logicflag " + logicflag2);
+            }
+
         } else {
-            System.out.println("Something went wrong\n");
+            if (LogicHandler(cond) == true) {
+                System.out.println("Success\n");
+            } else {
+                System.out.println("Something went wrong\n");
+            }
+
+            System.out.println("Test Phase\n");
+            while (LogicHandler(cond) == true) {
+                visit(whileStmt.getStatement());
+            }
+
+            System.out.println("Exiting While");
         }
 
-        System.out.println("Test Phase\n");
-        while (LogicHandler(cond) == true) {
-            visit(whileStmt.getStatement());
-        }
-
-        System.out.println("Exiting While");
     }
 
     public void visitOutputStmt(OutputStatement outNode) {
@@ -371,17 +412,16 @@ public class Interpreter {
                 }
 
                 System.out.println("Condition Token: " + condition.getLexeme());
-                switch (condition.getLexeme()) {
-                    case "<":
+                switch (condition.getType()) {
+                    case LESS_THAN:
                         if (Ileft < Iright) {
                             check = true;
-                            System.out.println("TEST01");
                             break;
                         } else {
                             check = false;
                             break;
                         }
-                    case "<=":
+                    case LESS_OR_EQUAL:
                         if (Ileft <= Iright) {
                             check = true;
                             break;
@@ -389,7 +429,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">":
+                    case GREATER_THAN:
                         if (Ileft > Iright) {
                             check = true;
                             break;
@@ -397,7 +437,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">=":
+                    case GREATER_OR_EQUAL:
                         if (Ileft >= Iright) {
                             check = true;
                             break;
@@ -405,7 +445,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<>":
+                    case NOT_EQUAL:
                         if (Ileft != Iright) {
                             check = true;
                             break;
@@ -413,7 +453,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "NOT":
+                    case NOT:
                         if (Ileft != Iright) {
                             check = true;
                             break;
@@ -421,7 +461,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "=":
+                    case EQUALS:
                         if (Ileft == Iright) {
                             check = true;
                             break;
@@ -440,8 +480,8 @@ public class Interpreter {
                     var r = Integer.parseInt(rightToken.getLiteral().toString());
                     Fright = r;
                 }
-                switch (condition.getLexeme()) {
-                    case "<":
+                switch (condition.getType()) {
+                    case LESS_THAN:
                         if (Ileft < Fright) {
                             check = true;
                             break;
@@ -449,7 +489,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<=":
+                    case LESS_OR_EQUAL:
                         if (Ileft <= Fright) {
                             check = true;
                             break;
@@ -457,7 +497,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">":
+                    case GREATER_THAN:
                         if (Ileft > Fright) {
                             check = true;
                             break;
@@ -465,7 +505,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">=":
+                    case GREATER_OR_EQUAL:
                         if (Ileft >= Fright) {
                             check = true;
                             break;
@@ -473,7 +513,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<>":
+                    case NOT_EQUAL:
                         if (Ileft != Fright) {
                             check = true;
                             break;
@@ -481,7 +521,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "NOT":
+                    case NOT:
                         if (Ileft != Fright) {
                             check = true;
                             break;
@@ -489,7 +529,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "=":
+                    case EQUALS:
                         if (Ileft == Fright) {
                             check = true;
                             break;
@@ -521,20 +561,20 @@ public class Interpreter {
                     var r = Boolean.parseBoolean(rightToken.getLiteral().toString());
                     Bright = r;
                 }
-                switch (condition.getLexeme()) {
-                    case "<":
+                switch (condition.getType()) {
+                    case LESS_THAN:
                         Error("The operator < is undefined for the argument type(s) boolean, boolean");
                         break;
-                    case "<=":
+                    case LESS_OR_EQUAL:
                         Error("The operator <= is undefined for the argument type(s) boolean, boolean");
                         break;
-                    case ">":
+                    case GREATER_THAN:
                         Error("The operator > is undefined for the argument type(s) boolean, boolean");
                         break;
-                    case ">=":
+                    case GREATER_OR_EQUAL:
                         Error("The operator >= is undefined for the argument type(s) boolean, boolean");
                         break;
-                    case "<>":
+                    case NOT_EQUAL:
                         if (Bleft != Bright) {
                             check = true;
                             break;
@@ -542,7 +582,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "NOT":
+                    case NOT:
                         if (Bleft != Bright) {
                             check = true;
                             break;
@@ -550,7 +590,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "=":
+                    case EQUALS:
                         if (Bleft == Bright) {
                             check = true;
                             break;
@@ -580,8 +620,8 @@ public class Interpreter {
                     var r = Integer.parseInt(rightToken.getLiteral().toString());
                     Iright = r;
                 }
-                switch (condition.getLexeme()) {
-                    case "<":
+                switch (condition.getType()) {
+                    case LESS_THAN:
                         if (Fleft < Iright) {
                             check = true;
                             break;
@@ -589,7 +629,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<=":
+                    case LESS_OR_EQUAL:
                         if (Fleft <= Iright) {
                             check = true;
                             break;
@@ -597,7 +637,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">":
+                    case GREATER_THAN:
                         if (Fleft > Iright) {
                             check = true;
                             break;
@@ -605,7 +645,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">=":
+                    case GREATER_OR_EQUAL:
                         if (Fleft >= Iright) {
                             check = true;
                             break;
@@ -613,7 +653,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<>":
+                    case NOT_EQUAL:
                         if (Fleft != Iright) {
                             check = true;
                             break;
@@ -621,7 +661,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "NOT":
+                    case NOT:
                         if (Fleft != Iright) {
                             check = true;
                             break;
@@ -629,7 +669,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "=":
+                    case EQUALS:
                         if (Fleft == Iright) {
                             check = true;
                             break;
@@ -648,8 +688,8 @@ public class Interpreter {
                     var r = Float.parseFloat(rightToken.getLiteral().toString());
                     Fright = r;
                 }
-                switch (condition.getLexeme()) {
-                    case "<":
+                switch (condition.getType()) {
+                    case LESS_THAN:
                         if (Fleft < Fright) {
                             check = true;
                             break;
@@ -657,7 +697,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<=":
+                    case LESS_OR_EQUAL:
                         if (Fleft <= Fright) {
                             check = true;
                             break;
@@ -665,7 +705,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">":
+                    case GREATER_THAN:
                         if (Fleft > Fright) {
                             check = true;
                             break;
@@ -673,7 +713,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case ">=":
+                    case GREATER_OR_EQUAL:
                         if (Fleft >= Fright) {
                             check = true;
                             break;
@@ -681,7 +721,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "<>":
+                    case NOT_EQUAL:
                         if (Fleft != Fright) {
                             check = true;
                             break;
@@ -689,7 +729,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "NOT":
+                    case NOT:
                         if (Fleft != Fright) {
                             check = true;
                             break;
@@ -697,7 +737,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "=":
+                    case EQUALS:
                         if (Fleft == Fright) {
                             check = true;
                             break;
@@ -731,20 +771,20 @@ public class Interpreter {
                     var r = rightToken.getLiteral().toString();
                     Sright = r;
                 }
-                switch (condition.getLexeme()) {
-                    case "<":
+                switch (condition.getType()) {
+                    case LESS_THAN:
                         Error("The operator < is undefined for the argument type(s) String, String");
                         break;
-                    case "<=":
+                    case LESS_OR_EQUAL:
                         Error("The operator <= is undefined for the argument type(s) String, String");
                         break;
-                    case ">":
-                        Error("The operator ? is undefined for the argument type(s) String, String");
+                    case GREATER_THAN:
+                        Error("The operator > is undefined for the argument type(s) String, String");
                         break;
-                    case ">=":
+                    case GREATER_OR_EQUAL:
                         Error("The operator >= is undefined for the argument type(s) String, String");
                         break;
-                    case "<>":
+                    case NOT_EQUAL:
                         if (Sleft != Sright) {
                             check = true;
                             break;
@@ -752,7 +792,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "NOT":
+                    case NOT:
                         if (Sleft != Sright) {
                             check = true;
                             break;
@@ -760,7 +800,7 @@ public class Interpreter {
                             check = false;
                             break;
                         }
-                    case "=":
+                    case EQUALS:
                         if (Sleft == Sright) {
                             check = true;
                             break;
@@ -776,20 +816,30 @@ public class Interpreter {
 
     public boolean LogicHandler2(boolean flag1, Token logic, boolean flag2) {
         boolean check = false;
-        switch (logic.getType()) {
-            case AND:
+        switch (logic.getLexeme()) {
+            case "AND":
                 if (flag1 && flag2) {
                     check = true;
+                    System.out.println("CHECK111");
+                    break;
+                } else {
+                    check = false;
                     break;
                 }
-            case OR:
+            case "OR":
                 if (flag1 || flag2) {
                     check = true;
                     break;
+                } else {
+                    check = false;
+                    break;
                 }
-            case NOT:
+            case "NOT":
                 if (flag1 != flag2) {
                     check = true;
+                    break;
+                } else {
+                    check = false;
                     break;
                 }
         }

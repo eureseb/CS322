@@ -43,6 +43,7 @@ public class App {
             // System.out.println(ast);
 
             // System.out.println("\n===== Interpreting =====\n");
+
             Interpreter interpreter = new Interpreter();
             interpreter.visit(ast);
 

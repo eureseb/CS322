@@ -1,7 +1,6 @@
 package com.pl.Statements;
 
 import com.pl.Token;
-import com.pl.TokenType;
 import com.pl.Nodes.Node;
 
 public class IfStatement extends Statement {

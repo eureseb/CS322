@@ -250,6 +250,9 @@ public class Parser {
                 System.out.print("CREATE WHILE NODE \n");
                 advance();
                 System.out.println(currToken);
+                boolean specialflag2;
+                Token special = null, left2, logic3, right2;
+                ConditionStatement condition2 = null;
                 if (currToken.getType().equals(PAREN_OPEN)) {
                     advance();
                     Token left = currToken;
@@ -264,6 +267,23 @@ public class Parser {
                     System.out.print(condition.toString());
                     System.out.println("While Checker: Successfull in Declaring Condition Statement");
                     advance();
+                    if (currToken.getType().equals(AND) || currToken.getType().equals(OR)
+                            || currToken.getType().equals(NOT)) {
+                        special = currToken;
+                        System.out.println(currToken + "SPECIAL");
+                        specialflag2 = true;
+                        advance();
+                        left2 = currToken;
+                        System.out.println(currToken);
+                        advance();
+                        logic3 = currToken;
+                        System.out.println(currToken);
+                        advance();
+                        right2 = currToken;
+                        System.out.println(currToken);
+                        condition2 = new ConditionStatement(left2, logic3, right2);
+                        advance();
+                    }
                     if (currToken.getType().equals(PAREN_CLOSE)) {
                         System.out.println(currToken);
                         advance();
@@ -282,7 +302,13 @@ public class Parser {
                             if (currToken.getType().equals(KW_STOP)) {
                                 advance();
                                 System.out.println(currToken);
-                                WhileStatement ctrlNode = new WhileStatement(condition, statement);
+                                WhileStatement ctrlNode;
+                                if (specialflag2 = true) {
+                                    ctrlNode = new WhileStatement(condition, condition2, special, specialflag2,
+                                            statement);
+                                } else {
+                                    ctrlNode = new WhileStatement(condition, statement);
+                                }
                                 return ctrlNode;
                             }
                         }
