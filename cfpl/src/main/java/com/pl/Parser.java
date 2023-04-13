@@ -250,7 +250,7 @@ public class Parser {
                 System.out.print("CREATE WHILE NODE \n");
                 advance();
                 System.out.println(currToken);
-                boolean specialflag2;
+                int specialflag2 = 0;
                 Token special = null, left2, logic3, right2;
                 ConditionStatement condition2 = null;
                 if (currToken.getType().equals(PAREN_OPEN)) {
@@ -271,7 +271,7 @@ public class Parser {
                             || currToken.getType().equals(NOT)) {
                         special = currToken;
                         System.out.println(currToken + "SPECIAL");
-                        specialflag2 = true;
+                        specialflag2 = 1;
                         advance();
                         left2 = currToken;
                         System.out.println(currToken);
@@ -303,7 +303,7 @@ public class Parser {
                                 advance();
                                 System.out.println(currToken);
                                 WhileStatement ctrlNode;
-                                if (specialflag2 = true) {
+                                if (specialflag2 == 1) {
                                     ctrlNode = new WhileStatement(condition, condition2, special, specialflag2,
                                             statement);
                                 } else {

@@ -148,7 +148,7 @@ public class Interpreter {
         ConditionStatement cond = whileStmt.getCondition();
         ConditionStatement cond2 = whileStmt.getCondition2();
         Token special = whileStmt.getSpecialType();
-        boolean flag = whileStmt.getSpecialCheck();
+        int flag = whileStmt.getSpecialCheck();
         System.out.println("Before getting values");
         System.out.println(cond.toString());
 
@@ -160,14 +160,14 @@ public class Interpreter {
 
         System.out.println("Testing Logic");
 
-        if (flag == true) {
-            System.out.println("Logic1: " + LogicHandler(cond));
-            System.out.println("Logic2: " + LogicHandler(cond2));
-            System.out.println("Special: " + special);
+        if (flag == 1) {
+            System.out.println("\nCondition 1 Logic is: " + LogicHandler(cond) + "\n");
+            System.out.println("\nCondition 2 Logic is: " + LogicHandler(cond2) + "\n");
+            System.out.println("\nSpecial: " + special + "\n");
             boolean logicflag2 = LogicHandler2(LogicHandler(cond), special, LogicHandler(cond2));
 
-            System.out.println("Cond1" + cond.getLogic());
-            System.out.println("Cond2" + cond2.getLogic());
+            System.out.println("\nRetrieving Condition 1 logic: " + cond.getLogic());
+            System.out.println("\nRetrieving Condition 2 logic: " + cond2.getLogic() + "\n");
             if (logicflag2 == true) {
                 System.out.println("Success\n");
             } else {
@@ -175,13 +175,16 @@ public class Interpreter {
             }
 
             System.out.println("Test Phase\n");
-            int x = 1;
+            int x = 0;
             while (logicflag2 == true) {
 
-                logicflag2 = LogicHandler2(LogicHandler(cond), special, LogicHandler(cond2));
-                System.out.println("X=" + x);
-                x++;
+                System.out.println("Condition 1 Logic is: " + LogicHandler(cond));
+                System.out.println("Condition 2 Logic is: " + LogicHandler(cond2));
+                System.out.println("\nSpecial Logic is: " + special);
+                System.out.println("\nIteration is: " + x + "\n");
                 visit(whileStmt.getStatement());
+                logicflag2 = LogicHandler2(LogicHandler(cond), special, LogicHandler(cond2));
+                x++;
 
                 // System.out.println("Logic1: " + LogicHandler(cond));
                 // System.out.println("Logic2: " + LogicHandler(cond2));
@@ -411,7 +414,7 @@ public class Interpreter {
                     System.out.println("Right Token: " + Iright);
                 }
 
-                System.out.println("Condition Token: " + condition.getLexeme());
+                System.out.println("Condition Token: " + condition.getLexeme() + ("\n"));
                 switch (condition.getType()) {
                     case LESS_THAN:
                         if (Ileft < Iright) {
@@ -820,10 +823,11 @@ public class Interpreter {
             case "AND":
                 if (flag1 && flag2) {
                     check = true;
-                    System.out.println("CHECK111");
+                    System.out.println("AND IS TRUE \n");
                     break;
                 } else {
                     check = false;
+                    System.out.println("AND IS FALSE \n");
                     break;
                 }
             case "OR":

@@ -8,7 +8,7 @@ public class WhileStatement extends Statement {
     Node statement;
     Token specialType;
     ConditionStatement condition2;
-    boolean specialCheck;
+    int specialCheck;
 
     public WhileStatement(ConditionStatement condition, Node statement) {
         this.condition = condition;
@@ -16,7 +16,7 @@ public class WhileStatement extends Statement {
     }
 
     public WhileStatement(ConditionStatement condition, ConditionStatement condition2, Token speciaType,
-            Boolean specialCheck, Node statement) {
+            int specialCheck, Node statement) {
         this.condition = condition;
         this.statement = statement;
         this.condition2 = condition2;
@@ -32,7 +32,7 @@ public class WhileStatement extends Statement {
         return this.statement;
     }
 
-    public boolean getSpecialCheck() {
+    public int getSpecialCheck() {
         return this.specialCheck;
     }
 
@@ -46,6 +46,6 @@ public class WhileStatement extends Statement {
 
     @Override
     public String toString() {
-        return "Condition:\n(" + condition + "\nStatement: \n" + statement + ')' + "\n";
+        return "Condition:\n(" + condition + "\nStatement: \n" + statement + "\nCondition 2: \n" + condition2 + "\nSpecial Check: \n" + specialCheck + "\nSpecial Type: \n" + specialType +')' + "\n";
     }
 }
